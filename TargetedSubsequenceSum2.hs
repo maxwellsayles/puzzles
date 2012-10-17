@@ -23,8 +23,6 @@ it can take advantage of an early exit from the right fold once a solution
 is fold.  The second solution uses a monadic fold which evaluates the entire
 list for both a right and left fold and so does not early exit once
 a solution is found.
-
-It is possible to write both solutions 
 -}
 
 import Control.Applicative
