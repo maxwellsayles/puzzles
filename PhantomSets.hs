@@ -14,7 +14,7 @@ data PhantomSet a = PhantomSet { contains :: a -> Bool,
 empty :: Ord a => PhantomSet a
 empty = helper Set.empty
     where helper set = let contains x = x `Set.member` set
-                           insert x   = helper $ x `Set.insert` set
+                           insert x   = helper $! x `Set.insert` set
                        in  PhantomSet contains insert
 
 main = do
