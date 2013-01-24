@@ -49,7 +49,7 @@
 ;; and finally verify that all the customers have been shaved.
 (do (doseq [cust customers] (send cust take-seat cust))
     @finished?
-    (if (and (map #(= :shaved (deref %)) customers))
+    (if (every? #(= :shaved (deref %)) customers)
       (println "Everyone is bald.")
       (println "Someone isn't bald!"))
     (shutdown-agents))
