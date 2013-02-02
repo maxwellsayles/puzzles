@@ -10,77 +10,92 @@ a dictionary of n keys.
 The algorithms iterates from index 1 through n, maintaining a sum of values
 encountered and a dictionary mapping the sum at each index to its location.
 At each index, it looks up in the dictionary the difference between the
-current sum and the target value.  If there is an entry, then we have a
+current sum and the target value. If there is an entry, then we have a
 solution, i.e. the range from the dictionary value + 1 to the current index.
 
-Note: The dictionary is initialized with a sum of 0 and an index of -1,
-since when a dictionary lookup succeeds, the value refers to the inclusive
-index at the end of the scan that sums to the key. In this case, if the
-range [0..j] sums to t, we lookup s-t=0 and get back -1 and the solution is
-on (-1 + 1, j).
+Note: The results are indices that start at 1, while Haskell indexes lists
+starting at 0.
 
 The first solution uses IntMap and so D(n) = O(logn) and the algorithm takes
-O(nlogn).  The second solution uses HashTable and so D(n) = O(1) and the
-algorithm takes O(n).
+O(nlogn). The second solution uses HashTable and so D(n) = O(1) and the
+algorithm takes O(n).  While the first solution incurs an O(logn) overhead,
+it can take advantage of an early exit from the right fold once a solution
+is fold.  The second solution uses a monadic fold which evaluates the entire
+list for both a right and left fold and so does not early exit once
+a solution is found.
 -}
 
 import Control.Applicative
+import Control.Arrow
+import Control.Monad
+import Control.Monad.ST
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
-import qualified Data.HashTable as Hash
+import Data.Foldable (foldrM)
+import qualified Data.HashTable.ST.Basic as Hash
 import qualified Data.IntMap as IntMap
 import Data.Maybe
-import System.IO.Unsafe
 import System.Random
 
 {-|
-/loop/ does a left fold over the list, while maintaining the index j,
-the current sum, and a map of sums to indexes i.
-/a/ uses the Maybe monad and looks up the current sum minus the target
-and returns the range (i+1, j).  /b/ recurses on the remainder of the list.
-The solution is /a/ if successful, otherwise /b/.
+We scanl summing the values and then zip this with the corresponding index
+and build a map from sum to index. We then fold over the (sum, index).
+The solution is either any previous solution, or we lookup the sum minus
+the target in the dictionary.  If an entry exists, the solution
+is the range+1 to the current index, or we continue with the fold.
+
+The outer fold takes advantage of the fact that a right fold does not
+evaluate the entire list if the evaluating function does not evaluate the
+accumulator.
 -}
 solveTree :: Int -> [Int] -> Maybe (Int, Int)
-solveTree t xs = loop xs 0 0 baseMap
-    where baseMap = IntMap.singleton 0 (-1)
-          loop []     _ _ _ = Nothing
-          loop (x:xs) j s m =
-              let s' = s + x
-                  a  = do i <- (s' - t) `IntMap.lookup` m
-                          return (i+1, j)
-                  b  = loop xs (j+1) s' $ IntMap.insert s' j m
-              in  a <|> b
+solveTree t xs = foldr helper Nothing sums
+    where dict = foldr (uncurry IntMap.insert) IntMap.empty sums
+          sums = flip zip [0..] . scanl (+) 0 $ xs
+          helper (s, j) acc = let res = do
+                                    i <- IntMap.lookup (s-t) dict
+                                    guard $ i < j
+                                    return (i+1, j)
+                              in  res <|> acc
 
 {-|
-The solution is similar to above, only we use HashTable instead of IntMap.
-/a/ uses (MaybeT IO Int) to bind the index i and compute the result (i+1,j).
-/b/ modifies the hash to contain the new sum and then recurses using /loop/.
-As above, the solution is /a/ if successful, otherwise /b/.  Since Haskell
-is lazily evaluated, /b/ is not evaluated unless /a/ fails.
+The implementation is similar to above, only we use a HashTable instead of
+an IntMap.
 -}
-solveHash :: Int -> [Int] -> Maybe (Int, Int)
-solveHash t xs = unsafePerformIO $ do
-  m <- Hash.new (==) Hash.hashInt
-  Hash.insert m 0 (-1)
-  let loop []     _ _ = return Nothing
-      loop (x:xs) j s = do
-        let s' = s + x
-        a <- runMaybeT $ do i <- MaybeT $ Hash.lookup m (s' - t)
-                            return (i+1, j)
-        b <- do Hash.insert m s' j
-                loop xs (j+1) s'
-        return $! a <|> b 
-  loop xs 0 0
+solveHash t xs = runST $ do
+  let sums = flip zip [0..] . scanl (+) 0 $ xs
+  dict <- Hash.new
+  forM_ sums $ uncurry (Hash.insert dict)
+  let helper (s, j) acc = do
+          res <- runMaybeT $ do
+                   i <- MaybeT $ Hash.lookup dict (s-t)
+                   guard $ i < j
+                   return (i+1, j)
+          return $! acc <|> res
+  foldrM helper Nothing sums
 
 {-|
-Generate a list of 10 random integers in the range [-10..10] inclusive,
-and a target integer, t, in the range [1..10], and then print
+On the input set from [-100..100] verify that both implementations
+give the same answer on each target [1..200].
+
+Then we generate a list of 10 random integers in the range [-10..10]
+inclusive, and a target integer, t, in the range [1..10], and then print
 the result of both computations.
 -}
 main = do
+  let a   = [-100..100]
+  let res = all (flip solveTree a &&& flip solveHash a >>>
+                 uncurry (==)) [1..200]
+  putStrLn $ if res then "All tests passed." else "Some tests failed."
+  putStrLn ""
+
   xs <- take 10 . randomRs ((-10)::Int, 10) <$> newStdGen
   t  <- randomRIO (1::Int, 10)
   putStrLn $ "xs: " ++ show xs
   putStrLn $ "t: " ++ show t
-  print $ solveTree t xs
-  print $ solveHash t xs
+  let res1 = solveTree t xs
+  let res2 = solveHash t xs
+  print res1
+  print res2
+  putStrLn $ if res1 == res2 then "PASSED" else "FAILED!"
+
