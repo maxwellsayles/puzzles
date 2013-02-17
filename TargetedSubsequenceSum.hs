@@ -75,6 +75,12 @@ solveHash t xs = runST $ do
   foldrM helper Nothing sums
 
 {-|
+Computes the sum of all values for the given indices.
+NOTE: Input indices start at 1, so we have to subtract 1 for list indices.
+-}
+verify t xs (i, j) = (==t) $ sum $ take (j - i + 1) $ drop (i - 1) xs
+
+{-|
 On the input set from [-100..100] verify that both implementations
 give the same answer on each target [1..200].
 
@@ -84,18 +90,24 @@ the result of both computations.
 -}
 main = do
   let a   = [-100..100]
-  let res = all (flip solveTree a &&& flip solveHash a >>>
-                 uncurry (==)) [1..200]
+  let res = all (\t -> (verify t a <$> solveTree t a) ==
+                       (verify t a <$> solveHash t a))
+                [1..200]
   putStrLn $ if res then "All tests passed." else "Some tests failed."
   putStrLn ""
 
+  putStrLn "Using a random example of 10 inputs."
   xs <- take 10 . randomRs ((-10)::Int, 10) <$> newStdGen
   t  <- randomRIO (1::Int, 10)
   putStrLn $ "xs: " ++ show xs
   putStrLn $ "t: " ++ show t
   let res1 = solveTree t xs
   let res2 = solveHash t xs
-  print res1
-  print res2
-  putStrLn $ if res1 == res2 then "PASSED" else "FAILED!"
+  putStrLn $ "Tree: " ++ show res1
+  putStrLn $ "Hash: " ++ show res2
+  let res1' = verify t xs <$> res1
+  let res2' = verify t xs <$> res2
+  putStrLn $ if res1' == res2' then "PASSED" else "FAILED!"
+
+
 
