@@ -8,25 +8,35 @@
    7 are thrown away and three more dice are rolled.  Unfortunately, this
    solution is wasteful.
 
-   The solution here is a special case of arithmetic coding.  Two variables
-   are maintained indicating a range [x, y).  Initially x = 0 and y = 6.
-   For each coin flip, the range is divided in half.  A coin flip of 0
-   gives the range [x, m) and a coin flip of 1 gives the range [m, y) where
-   m = (x + y) / 2.  When x' = floor(x) and y' = ceil(y) are such that
-   y' - x' = 1, i.e. x and y are in the same integer range, then the coin
-   flips have determined the dice roll, x'.  At this point, the range is
-   scaled by 6 and we recurse on the range [x'', y'') such that
-   x'' = 6 * (x - x') and y'' = 6 * (y - x').
+   The solution here is a special case of arithmetic coding.  Imagine the
+   unit length is divided into six equal sized lengths representing the six
+   possible outcomes of a dice roll.  Each of these lengths are recursively
+   divided into six equal lengths and so on, each iteration representing the
+   outcome of subsequent dice rolls.  Two variables are maintained
+   indicating the range [x, y), and each coin flip divides the range in half.
+   Once both end points of the range are within a recursively defined
+   interval, a dice roll is determined and can be output.  Under this
+   interpretation, the range [x, y) is always getting smaller.
+
+   The implementation here normalizes recursive unit lengths to the interval
+   [0, 6).  Initially set x = 0 and y = 6.  A coin flip of 0 gives the range
+   [x, m) and a coin flip of 1 gives the range [m, y) where m = (x + y) / 2.
+   When x' = floor(x) and y' = ceil(y) are such that y' - x' = 1,
+   i.e. x and y are in the same integer range, then the coin flips have
+   determined the dice roll, x'.  At this point, the range is scaled by 6
+   and we recurse on the range [x'', y'') such that x'' = 6 * (x - x')
+   and y'' = 6 * (y - x').
 
    Although no coin flips are wasted, the number of bits needed to
    accurately represent each end point of the interval grow linearly with
    the number of coin flips consumed.  As such, the space complexity is
    linear with the input and output.
 
-   This can be run with: clojure dice-from-coins.clj
+   This program can be run using: clojure dice-from-coins.clj
 
    The output is a histogram of the dice values rolled.  Each quantity
-   should be nearly the same to indicate the uniformity of dice rolls.")
+   should be roughly the same to indicate the uniformity of dice rolls.
+   The program takes about 30 seconds to complete on my computer.")
 
 (defn floor
   "The floor of a ratio or an integer.
