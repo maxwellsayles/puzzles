@@ -18,19 +18,33 @@
 (def hair-cut-count (ref 0))
 (def finished? (promise))
 
-;; Give the customer a shave, make his seat available,
-;; and put another notch in our belt.  If we have one
-;; notch for every customer, then deliver true to 'finished?'.
+;; Synchronize print operations.
+(def printer (agent nil))
+(defn println-sync [& args]
+  (send printer (fn [_] (apply println args))))
+
+;; First give the customer a shave, then have the customer free up
+;; the seat, increment the shave count, and check if the number of
+;; shaves is equal to the number of customers.  The reason this
+;; is performed by the customer as two separate send operations,
+;; is because the second send cannot run until the customer's state
+;; is guaranteed to be :shaved.
+;; NOTE: In a future remodelling, it might make sense to have the
+;; customer's state as a ref instead of an agent, however, the
+;; customer still needs an agent so it can request to get its hair cut.
 (defn cut-hair [_ cust]
-  (let [cut-count (dosync
-                   (println (str "Cutting hair #" @hair-cut-count))
-                   (alter hair-cut-count inc)
-                   (alter seats-available inc)
-                   @hair-cut-count)]
-    (send cust (fn [_] :shaved))
-    (when (= cut-count customer-count)
-      (deliver finished? true))))
-    
+  (do
+    (send cust (constantly :shaved))
+    (send cust (fn [state]
+                 (let [cut-count (dosync
+                                  (alter seats-available inc)
+                                  (alter hair-cut-count inc)
+                                  @hair-cut-count)]
+                   (println-sync (str "Customer #" cut-count " got a shave."))
+                   (when (= cut-count customer-count)
+                     (deliver finished? true))
+                   state)))))
+
 ;; If there's a seat available, have the customer take
 ;; a seat, and then ask the barber to shave him.
 ;; Otherwise, ask the customer to try again later.
@@ -50,7 +64,8 @@
 (do (doseq [cust customers] (send cust take-seat cust))
     @finished?
     (if (every? #(= :shaved (deref %)) customers)
-      (println "Everyone is bald.")
-      (println "Someone isn't bald!"))
+      (println-sync "Everyone is bald.")
+      (println-sync "Someone isn't bald!"))
+    (await printer)
     (shutdown-agents))
 
