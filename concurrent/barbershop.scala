@@ -6,14 +6,12 @@
  * one actor for a shop.  The shop owns a queue of seats.  The customer
  * asks the shop if a seat is available.  If there's a seat, the customer
  * is added to the queue, otherwise the shop lets the customer know to try
- * again later.  When the barber is finished taking a break, it asks the
- * shop if anyone is seated.  If there is, the shop asks the barber to
- * shave the customer and removes him from the queue.  The barber then
- * notifies the customer that he has been shaved, and the customer changes
- * his state and then quites acting.  If there is no one seated in the shop,
- * the shop tells the barber to take another break. Once the barber has
- * shaved a number of customers equal to the total number of customers,
- * he notifies the shop to close down, and the simulation that it's over.
+ * again later.  The barber tells the shop he's looking for work.  If
+ * there's a customer waiting, the barber is asked to shave the customer.
+ * Otherwise, the barber is added to a queue.  When a customer walks in,
+ * the barber is removed from the queue and asked to shave the customer.
+ * Once the barber has shaved a number of customers equal to the total
+ * number of customers, he notifies the shop and simulation to shutdown.
  * The simulation then verifies that all customers are shaved.
  */
 
@@ -25,35 +23,36 @@ val totalCustomers = 1000
 
 // Messages
 case class LookingForWork(barber: Actor)
-case object TakeABreak
 case object CloseUpShop
 case object SorryTryAgain
 case object Shaved
 case class TakeASeat(cust: Actor)
 case class PleaseShave(cust: Actor)
 
-// Represents a queue of customers.
+// Represents queues of customers and barbers.
 class Shop extends Actor {
-  private val seated = Queue[Actor]()
+  private val customers = Queue[Actor]()
+  private val barbers   = Queue[Actor]()
   def act {
     loop {
       react {
 	case TakeASeat(cust) =>
-	  // If a seat is available, add the customer, otherwise
-	  // tell him to try again.
-	  if (seated.size < totalSeats) {
-	    seated += cust
+	  if (!barbers.isEmpty) {
+	    barbers.dequeue ! PleaseShave(cust)
 	  } else {
-	    cust ! SorryTryAgain
+	    if (customers.size < totalSeats) {
+	      customers += cust
+	    } else {
+	      cust ! SorryTryAgain
+	    }
 	  }
-	
+
 	case LookingForWork(barber) =>
-	  // If there's customer in the seat, ask the barber to
-	  // shave him.  Either way, tell the barber to take a break.
-	  if (!seated.isEmpty) {
-	    barber ! PleaseShave(seated.dequeue)
+	  if (!customers.isEmpty) {
+	    barber ! PleaseShave(customers.dequeue)
+	  } else {
+	    barbers += barber
 	  }
-	  barber ! TakeABreak
 	
 	case CloseUpShop =>
 	  exit
@@ -69,9 +68,9 @@ class Customer(shop: Actor) extends Actor {
   private var face = 'hairy
   def getFace = face
   def act {
+    shop ! TakeASeat(this)
     react {
       case SorryTryAgain =>
-	shop ! TakeASeat(this)
 	act
       case Shaved =>
 	face = 'shaved
@@ -79,14 +78,15 @@ class Customer(shop: Actor) extends Actor {
   }
 }
 
-// When the barber is on break, he asks the shop for work.
+// The barber tells the shop that he's looking for work.
 // If there's a customer in the shop, the shop will ask
 // the barber to please shave the customer.
 class Barber(sim: Actor, shop: Actor) extends Actor {
   private var hairCutsGiven = 0
   def act {
     loop {
-      receive {
+      shop ! LookingForWork(this)
+      react {
 	case PleaseShave(cust) =>
 	  hairCutsGiven += 1
 	  println("Shave #" + hairCutsGiven)
@@ -96,9 +96,6 @@ class Barber(sim: Actor, shop: Actor) extends Actor {
 	    sim ! CloseUpShop
 	    exit
 	  }
-	case TakeABreak =>
-	  shop ! LookingForWork(this)
-	  act
       }
     }
   }
@@ -109,13 +106,11 @@ class Barber(sim: Actor, shop: Actor) extends Actor {
 // that all customer's are 'shaved.
 class Sim extends Actor {
   private val shop = new Shop
-  private val customers = 1 to totalCustomers map { _ => new Customer(shop) }
   private val barber = new Barber(this, shop)
-  barber.start
+  private val customers = 1 to totalCustomers map { _ => new Customer(shop) }
   shop.start
+  barber.start
   customers foreach (cust => cust.start)
-  barber ! TakeABreak
-  customers foreach (cust => cust ! SorryTryAgain)
 
   def act {
     react {
