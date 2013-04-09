@@ -19,7 +19,7 @@
 ;; was that the agent state is only set *after* a call to (send) returns.
 ;; Since this is done asynchronously, the only way to know when a (send)
 ;; finishes, is to place another (send) on the same agent (since an
-;; agent while request sends synchronously and in order if they originate
+;; agent will process sends synchronously and in order if they originate
 ;; from the same calling agent).  This solution worked, but had the customer
 ;; essentially doing the work of shaving himself.
 ;;
