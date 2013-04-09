@@ -71,7 +71,7 @@
 ;; and finally verify that all the customers have been shaved.
 (do (doseq [cust customers] (send cust take-seat cust))
     @finished?
-    (if (every? #(= :shaved (deref (deref %))) customers)
+    (if (every? (fn [cust] (= :shaved @@cust)) customers)
       (println-sync "Everyone is bald.")
       (println-sync "Someone isn't bald!"))
     (await printer)
