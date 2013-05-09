@@ -1,6 +1,6 @@
 /**
  * You are given a list of uniformly random coin flips (0 and 1).
- * Generate as last a list as possible of uniformly random dice rolls
+ * Generate as large a list as possible of uniformly random dice rolls
  * (0 through 5).
  *
  * The solution here is a special case of arithmetic encoding.  We start with
