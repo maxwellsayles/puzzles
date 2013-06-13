@@ -104,15 +104,8 @@ object StringReduce {
     def reduce: String3 => String3 = {
       case s if s.isReduced => s
       case s =>
-        val res = if (s.hasPrev) tryReduce(s.prev) else None
-        res match {
-          case Some(s1) => reduce(s1)
-          case None     =>
-            tryReduce(s) match {
-              case Some(s2) => reduce(s2)
-              case None     => reduce(s.next)
-            }
-        }
+        val prev = if (s.hasPrev) tryReduce(s.prev) else None
+        reduce((prev orElse tryReduce(s)) getOrElse s.next)
     }
 
     val s1 = new String3(s)
