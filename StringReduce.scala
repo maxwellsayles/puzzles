@@ -8,7 +8,9 @@
   * reduced.  If all counts are even or all counts are odd, then the
   * smallest possible is 2, otherwise, it is 1.
   * 
-  * Here we also use a greedy algorithm that should run in O(n).
+  * Here we also use a greedy algorithm that should run in O(n), which
+  * was originally suggested by Chris Thornton.
+  *
   * We first convert the string to a custom doubly linked list (we use
   * two lists one representing forward and one representing backward).
   * We then iterate the string from left to right, and any time two
