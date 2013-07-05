@@ -19,7 +19,7 @@ string add_int_to_string(const int i, const string& s) {
     return [k, x](int carry) {
       int y = (carry % 10) + x - '0';
       int carry2 = (carry / 10) + (y / 10);
-      return k(carry2) + to_string(y % 10) ;
+      return k(carry2) + to_string(y % 10);
     };
   };
   return accumulate(s.begin(), s.end(), last, step)(i);
