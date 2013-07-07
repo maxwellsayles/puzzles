@@ -26,7 +26,7 @@
 // A string is valid when it contains at least 2 different characters
 // or when it only has one type of character and is no longer than 2
 // characters.
-class String3(hist: Map[Char, Int], front: List[Char], back: List[Char]) {
+class String3 private (hist: Map[Char, Int], front: List[Char], back: List[Char]) {
   def this(s: String) = this(String3.histFromString(s), s.toList, Nil)
 
   def hasPrev: Boolean = !back.isEmpty
