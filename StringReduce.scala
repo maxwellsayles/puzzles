@@ -87,16 +87,16 @@ object StringReduce {
   // but we are not interested in that.
   def greedy(s: String): Int = {
     // Try to treduce the two characters at the current location.
-    def tryReduce(s: String3): Option[String3] = {
-      if (s.hasNext && s.next.hasNext) {
-        val (x, y) = (s.elem, s.next.elem)
-        if (x == y) None
-        else {
-          val z = ('a' + 'b' + 'c' - x.toInt - y.toInt).toChar
-          val s1 = s.remove.remove.insert(z)
-          if (s1.isValid) Some(s1) else None
+    def tryReduce: String3 => Option[String3] = {
+      case s if s.hasNext && s.next.hasNext =>
+        (s.elem, s.next.elem) match {
+          case (x, y) if x == y => None
+          case (x, y) =>
+            val z = ('a' + 'b' + 'c' - x.toInt - y.toInt).toChar
+            val s1 = s.remove.remove.insert(z)
+            if (s1.isValid) Some(s1) else None
         }
-      } else None
+      case _ => None
     }
 
     // Repeatedly try to reduce the previous position,
