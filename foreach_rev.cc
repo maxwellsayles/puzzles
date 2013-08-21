@@ -47,7 +47,7 @@
  *             cn^{1/4} <= cn^{1/2} - n^{1/2}
  *             cn^{1/4} <= (c-1) n^{1/2}
  *          c / (c - 1) <= n^{1/4}
- * which holds for c = 2 and n >= 2^{1/4}.  This proves the space complexity.
+ * which holds for c = 2 and n >= 2^4.  This proves the space complexity.
  *
  * The O(nlgn) time and O(lgn) space method divides the list in half and
  * recursively handles each sublist.  The proof of the complexity is similar
