@@ -34,27 +34,32 @@ linear with the input and output.
 
 The output is a histogram of the dice values rolled.  Each quantity
 should be roughly the same to indicate the uniformity of dice rolls.
+
+NOTE: Since division is always by 2 and scaling is by 6, instead of using
+a rational, we track the numerator and the value k for the denominator 2^k.
 -}
 
 import Control.Applicative
 import Control.Arrow
+import Data.Bits
 import Data.List
-import Data.Ratio
 import System.Random
 
 {-| Converts an infinite lazy sequence of coin flips
     into an infinite lazy sequence of dice rolls." -}
 dice :: [Int] -> [Int]
-dice = f (0%1) (6%1)
-    where f x y (b:bs)
-              | ceiling y - floor x == 1 =
-                  floor x : f x' y' (b:bs)
-              | b == 0 = f x m bs
-              | b == 1 = f m y bs
-              where m  = (x + y) / 2
-                    v  = fromIntegral $ floor x
-                    x' = 6 * (x - v)
-                    y' = 6 * (y - v)
+dice = f 0 6 0
+    where f :: Integer -> Integer -> Int -> [Int] -> [Int]
+          f x y k (b:bs)
+              | v == (y - 1) `shiftR` k =
+                  (fromInteger v) : f x' y' (k - 1) (b:bs)
+              | b == 0 = f (x `shiftL` 1) m (k + 1) bs
+              | b == 1 = f m (y `shiftL` 1) (k + 1) bs
+              where m  = x + y
+                    v  = x `shiftR` k
+                    v' = v `shiftL` k
+                    x' = 3 * (x - v')
+                    y' = 3 * (y - v')
 
 -- | Generate pairs (elem, count) representing
 -- | the histogram of the input list.
