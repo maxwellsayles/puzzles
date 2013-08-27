@@ -10,6 +10,8 @@
  * value is found, it advances both indexes 'gobbling' up that value.
  *
  * Run time is O(n) and memory is O(1).
+ *
+ * Compile with g++ -O3 to enable tail call optimizations.
  */
 
 #include <iostream>
