@@ -1,5 +1,5 @@
 % This is a solution to the longest substring palindrome in Prolog.
-% It's at least \Omega(n^3) in runtime, and possibly O(n^2) on a good day.
+% It is at least \Omega(n^3) in runtime, and possibly O(n^2) on a good day.
 % I have an O(n) solution in LongestSubstringPalindrome.hs, but
 % this was more to learn some prolog and see how easy it would be to write
 % the brute force solution.
@@ -25,7 +25,7 @@ suffix(X, Res) :- append(Res, _, X).
 prefix(X, Res) :- append(_, Res, X).
 sublist(X, Res) :- prefix(X, Tmp), suffix(Tmp, Res).
 
-% True if Output is a substring of Input and it's a palindrome.
+% True if Output is a substring of Input and it is a palindrome.
 substringPalindrome(Input, Output) :-
     sublist(Input, Output),
     palindrome(Output).
