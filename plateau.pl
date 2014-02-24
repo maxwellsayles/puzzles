@@ -12,6 +12,6 @@ plateaus(Xs, Results) :- findall(Res, plateau_(Xs, [], Res), Results).
 plateau_([],     Acc,       Acc) :- Acc = [_,_|_].
 plateau_([X|Xs], [],        Res) :- plateau_(Xs, [X], Res).
 plateau_([X|Xs], [X|Acc],   Res) :- plateau_(Xs, [X,X|Acc], Res).
-plateau_([X|_],  [Y,Y|Acc], Res) :- X \= Y, Res = [Y,Y|Acc].
+plateau_([X|_],  Acc,       Acc) :- Acc = [Y,Y|_], X \= Y.
 plateau_([X|Xs], [Y|_],     Res) :- X \= Y, plateau_(Xs, [X], Res).
 
