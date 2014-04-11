@@ -74,29 +74,25 @@ def iterate[T](
  */
 def iterate2[T](
   f: T => Unit,
-  n: Tree[T]
+  n: Tree[T],
+  k: => Unit = {}
 ) {
-  def step(
-    n: Tree[T],
-    k: => Unit
-  ) {
-    n match {
-      case Leaf => k
-      case Node(l, v, r) =>
-        step(l, {
-          step(r, {
-            f(v)
-            k
-          })
+  n match {
+    case Leaf => k
+    case Node(l, v, r) =>
+      iterate2(f, l, {
+        iterate2(f, r, {
+          f(v)
+          k
         })
-    }
+      })
   }
-  step(n, {})
 }
 
 def doTree(t: Tree[Int]) {
   val iter = new PostOrderIter(t)
   iterate(print, iter)
+  print(' ')
   iterate2(print, t)
   println()
 }
