@@ -47,7 +47,7 @@ type PostOrderIterator<'T>(n: Tree<'T>) =
                     stack <- rest
                     Some(v)
 
-let rec iteratePostOrder<'T> f (iter: PostOrderIterator<'T>) =
+let rec iteratePostOrder<'T> (f: 'T -> unit) (iter: PostOrderIterator<'T>) =
     match iter.Next() with
     | None -> ()
     | Some(v) ->
