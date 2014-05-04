@@ -57,11 +57,12 @@ solveDP xs w = opt ! (0, n')
     arr = listArray (0, n') $ 0 : xs ++ [w]
 
     opt :: Array (Int, Int) Int
-    opt = array ((0, 0), (n', n')) $
-          [((i, j), eval i j) |
-           len <- [0 .. n'],
-           i <- [0 .. n' - len],
-           let j = i + len]
+    opt = array ((0, 0), (n', n')) $ do
+      len <- [0 .. n']
+      i <- [0 .. n' - len]
+      let j = i + len
+      let res = eval i j
+      return ((i, j), res)
 
     eval :: Int -> Int -> Int
     eval i j
@@ -69,8 +70,9 @@ solveDP xs w = opt ! (0, n')
       | otherwise = foldl' min (head costs) (tail costs)
       where
         costs = [intervalCost k | k <- [i + 1 .. j - 1]]
-        intervalCost k = w + opt ! (i, k) + opt ! (k, j)
-        w = arr ! j - arr ! i
+        intervalCost k =
+          let w' = arr ! j - arr ! i
+          in  w' + opt ! (i, k) + opt ! (k, j)
 
 data TestInput = TestInput [Int] Int deriving Show
 
