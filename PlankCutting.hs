@@ -1,7 +1,7 @@
 {-|
 You are given a plank of length w and a list xs where you must cut the plank.
 The cost of each cut is the cost of the length of the segment at the time
-of the cut.  For example, support
+of the cut.  For example, suppose
 
   w = 10
   xs = [2, 5, 7]
@@ -42,10 +42,9 @@ solveExhaustive xs w = loop 0 n'
       | i + 1 >= j = 0
       | otherwise = foldl' min (head costs) (tail costs)
       where
+        w' = (arr ! j) - (arr ! i)
         costs = [intervalCost k | k <- [i + 1 .. j - 1]]
-        intervalCost k =
-          let w' = (arr ! j) - (arr ! i)
-          in  w' + loop i k + loop k j
+        intervalCost k = w' + loop i k + loop k j
 
 solveDP :: [Int] -> Int -> Int
 solveDP xs w = opt ! (0, n')
@@ -69,10 +68,9 @@ solveDP xs w = opt ! (0, n')
       | i + 1 >= j = 0
       | otherwise = foldl' min (head costs) (tail costs)
       where
+        w' = arr ! j - arr ! i
         costs = [intervalCost k | k <- [i + 1 .. j - 1]]
-        intervalCost k =
-          let w' = arr ! j - arr ! i
-          in  w' + opt ! (i, k) + opt ! (k, j)
+        intervalCost k = w' + opt ! (i, k) + opt ! (k, j)
 
 data TestInput = TestInput [Int] Int deriving Show
 
