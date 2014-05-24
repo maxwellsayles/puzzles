@@ -19,7 +19,7 @@ and right segments created.
 The dynamic programming approach is exactly the same, but memoizes the
 results.  The DP solution is also computed from the bottom up: we first
 compute all segments containing 1 cut, then 2 cuts, up to all n cuts.  The
-DP solution should take O(n^2) time and memory.
+DP solution should take O(n^3) time and O(n^2) memory.
 -}
 
 import Control.Applicative
