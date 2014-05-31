@@ -20,7 +20,7 @@ The first solution uses IntMap and so D(n) = O(logn) and the algorithm takes
 O(nlogn). The second solution uses HashTable and so D(n) = O(1) and the
 algorithm takes O(n).  While the first solution incurs an O(logn) overhead,
 it can take advantage of an early exit from the right fold once a solution
-is fold.  The second solution uses a monadic fold which evaluates the entire
+is found.  The second solution uses a monadic fold which evaluates the entire
 list for both a right and left fold and so does not early exit once
 a solution is found.
 -}
