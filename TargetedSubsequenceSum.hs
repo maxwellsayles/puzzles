@@ -61,21 +61,21 @@ solveTree t xs = foldr helper Nothing (zip sums dicts)
       in  res <|> acc
 
 {-|
-The implementation is similar to above, only we use a HashTable instead of
-an IntMap.  The HashTable is computed over all sums rather than lazily as the
-list is computed.
+This implementation is conceptually similar to above, only we use a HashTable
+instead of an IntMap, and the loop is explicit rather than a fold.
 -}
 solveHash t xs = runST $ do
-  let sums = flip zip [0..] . scanl (+) 0 $ xs
+  let sums = zip [0..] $ scanl (+) 0 xs
   dict <- Hash.new
-  forM_ sums $ uncurry (Hash.insert dict)
-  let helper (s, j) acc = do
-          res <- runMaybeT $ do
-                   i <- MaybeT $ Hash.lookup dict (s-t)
-                   guard $ i < j
-                   return (i+1, j)
-          return $! acc <|> res
-  foldrM helper Nothing sums
+  let loop [] = return Nothing
+      loop ((j, s) : xs) = do
+        m <- Hash.lookup dict (s - t)
+        case m of
+          Nothing -> do
+            Hash.insert dict s j
+            loop xs
+          Just i -> return $ Just (i + 1, j)
+  loop sums
 
 {-|
 Computes the sum of all values for the given indices.
