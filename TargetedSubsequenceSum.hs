@@ -38,29 +38,32 @@ import Data.Maybe
 import System.Random
 
 {-|
-We scanl summing the values and then zip this with the corresponding index
-and build a map from sum to index. We then fold over the (sum, index).
-The solution is either any previous solution, or we lookup the sum minus
-the target in the dictionary.  If an entry exists, the solution
-is the range+1 to the current index, or we continue with the fold.
+We scanl summing the values and then zip this with the corresponding index.
+Then we scanl over this to build a map from sum to index. We then fold over
+the (sum, index).  We lookup the sum minus the target in the dictionary.
+If an entry exists, the solution is the range+1 to the current index, or we
+continue with the fold.
 
-The outer fold takes advantage of the fact that a right fold does not
-evaluate the entire list if the evaluating function does not evaluate the
-accumulator.
+The fold takes advantage of the fact that a right fold does not evaluate the
+entire list if the evaluating function does not evaluate the accumulator.  Also
+scanl lazily builds the results from left to right, and so can be early
+terminated once a solution is found.
 -}
 solveTree :: Int -> [Int] -> Maybe (Int, Int)
-solveTree t xs = foldr helper Nothing sums
-    where dict = foldr (uncurry IntMap.insert) IntMap.empty sums
-          sums = flip zip [0..] . scanl (+) 0 $ xs
-          helper (s, j) acc = let res = do
-                                    i <- IntMap.lookup (s-t) dict
-                                    guard $ i < j
-                                    return (i+1, j)
-                              in  res <|> acc
+solveTree t xs = foldr helper Nothing (zip sums dicts)
+  where
+    dicts = scanl (\m (v, k) -> IntMap.insert k v m) IntMap.empty sums
+    sums = zip [0..] $ scanl (+) 0 xs
+    helper ((j, s), m) acc =
+      let res = do
+            i <- IntMap.lookup (s - t) m
+            return (i + 1, j)
+      in  res <|> acc
 
 {-|
 The implementation is similar to above, only we use a HashTable instead of
-an IntMap.
+an IntMap.  The HashTable is computed over all sums rather than lazily as the
+list is computed.
 -}
 solveHash t xs = runST $ do
   let sums = flip zip [0..] . scanl (+) 0 $ xs
