@@ -26,15 +26,9 @@ a solution is found.
 -}
 
 import Control.Applicative
-import Control.Arrow
-import Control.Monad
 import Control.Monad.ST
-import Control.Monad.Trans
-import Control.Monad.Trans.Maybe
-import Data.Foldable (foldrM)
 import qualified Data.HashTable.ST.Basic as Hash
 import qualified Data.IntMap as IntMap
-import Data.Maybe
 import System.Random
 
 {-|
@@ -64,16 +58,17 @@ solveTree t xs = foldr helper Nothing (zip sums dicts)
 This implementation is conceptually similar to above, only we use a HashTable
 instead of an IntMap, and the loop is explicit rather than a fold.
 -}
+solveHash :: Int -> [Int] -> Maybe (Int, Int)
 solveHash t xs = runST $ do
   let sums = zip [0..] $ scanl (+) 0 xs
   dict <- Hash.new
   let loop [] = return Nothing
-      loop ((j, s) : xs) = do
+      loop ((j, s) : xs') = do
         m <- Hash.lookup dict (s - t)
         case m of
           Nothing -> do
             Hash.insert dict s j
-            loop xs
+            loop xs'
           Just i -> return $ Just (i + 1, j)
   loop sums
 
@@ -81,6 +76,7 @@ solveHash t xs = runST $ do
 Computes the sum of all values for the given indices.
 NOTE: Input indices start at 1, so we have to subtract 1 for list indices.
 -}
+verify :: Int -> [Int] -> (Int, Int) -> Bool
 verify t xs (i, j) = (==t) $ sum $ take (j - i + 1) $ drop (i - 1) xs
 
 {-|
@@ -91,6 +87,7 @@ Then we generate a list of 10 random integers in the range [-10..10]
 inclusive, and a target integer, t, in the range [1..10], and then print
 the result of both computations.
 -}
+main :: IO ()
 main = do
   let a   = [-100..100]
   let res = all (\t -> (verify t a <$> solveTree t a) ==
