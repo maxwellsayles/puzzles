@@ -12,9 +12,9 @@ let make_list len =
 
 (* Drop the first `len` elements from the list. *)
 let rec drop len ({ next = next } as node) =
-  if len < 0 then invalid_arg "len must be >= 0"
-  else if len = 0 then node
-  else
+  match len with
+  | 0 -> node
+  | _ ->
     match next with
     | None -> failwith "Tried to drop more elements than in the list"
     | Some next_node -> drop (len - 1) next_node
