@@ -1,6 +1,6 @@
 (* An implementation of Brent's cycle finding -- the teleporting tortoise. *)
 
-type 'a node = { mutable next: 'a node option }
+type node = { mutable next: node option }
 
 (* Construct a list of `len` elements. *)
 let make_list len =
@@ -10,14 +10,17 @@ let make_list len =
     | _ -> loop (len - 1) { next = Some acc } in
   loop len { next = None }
 
+(* Given a node, return the next node. *)
+let next_node { next = next } =
+  match next with
+  | None -> failwith "No next"
+  | Some n -> n
+
 (* Drop the first `len` elements from the list. *)
-let rec drop len ({ next = next } as node) =
+let rec drop len node =
   match len with
   | 0 -> node
-  | _ ->
-    match next with
-    | None -> failwith "Tried to drop more elements than in the list"
-    | Some next_node -> drop (len - 1) next_node
+  | _ -> drop (len - 1) (next_node node)
 
 (* Construct a list with the given tail and cycle length. *)
 let make_cycle cycle_length tail_length =
@@ -41,7 +44,7 @@ let rec iterate f x n =
    This way, eventually the hare takes a number of steps more than the cycle length
    and the sum of all the steps taken in 2n-1. *)
 let detect_cycle_length f x =
-  let rec loop ({ next = next } as hare) tortoise steps power =
+  let rec loop hare tortoise steps power =
     if tortoise == hare & steps > 0 then steps
     else if steps = power then loop hare hare 0 (power * 2)
     else loop (f hare) tortoise (steps + 1) power in
@@ -59,12 +62,6 @@ let detect_tail_length f x u =
   let rec together x y steps =
     if x == y then steps else together (f x) (f y) (steps + 1) in
   together x y 0
-
-(* Given a node, return the next node. *)
-let next_node { next = next } =
-  match next with
-  | None -> failwith "No next"
-  | Some n -> n
 
 (* Construct a linked list with a cycle of random length and then run the
    teleporting tortoise detection algorithm and verify the results. *)
