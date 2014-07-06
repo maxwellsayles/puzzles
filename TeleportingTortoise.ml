@@ -45,7 +45,7 @@ let rec iterate f x n =
    and the sum of all the steps taken in 2n-1. *)
 let detect_cycle_length f x =
   let rec loop hare tortoise steps power =
-    if tortoise == hare & steps > 0 then steps
+    if tortoise == hare && steps > 0 then steps
     else if steps = power then loop hare hare 0 (power * 2)
     else loop (f hare) tortoise (steps + 1) power in
   loop x x 0 1
@@ -80,7 +80,7 @@ let run_test() =
   let t = detect_tail_length next_node xs c in
   Printf.printf "Detected a tail length of %d\n" t;
 
-  if c = cycle_length & t = tail_length
+  if c = cycle_length && t = tail_length
   then Printf.printf "Everything is okay!\n\n"
   else failwith "Something went horrible wrong!"
 
