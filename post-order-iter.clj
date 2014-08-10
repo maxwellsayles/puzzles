@@ -43,9 +43,9 @@
         (next-value [_] (dosync (next-node)))))))
 
 (defn test-post-order-iter []
-  (let [t [[[] 2 [3]] 4 [5]]
-        iter (apply post-order-iter t)]
-    (apply traverse t)
+  (let [tree [[[] 2 [3]] 4 [5]]
+        iter (apply post-order-iter tree)]
+    (apply traverse tree)
     (println)
     (loop []
       (when (.has-more? iter)
