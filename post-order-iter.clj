@@ -18,13 +18,13 @@
   ([]))
 
 (defn post-order-iter [& xs]
-  (let [ops (ref (list))]
+  (let [ops (atom (list))]
     (letfn
         [(push-node
            ([])
-           ([x] (alter ops (partial cons (fn [] x))))
+           ([x] (swap! ops (partial cons (fn [] x))))
            ([l x r]
-              (alter ops conj
+              (swap! ops conj
                      (fn [] x)
                      (fn [] (op-node r))
                      (fn [] (op-node l)))))
@@ -34,13 +34,13 @@
 
          (next-node []
            (let [op (first (deref ops))]
-             (alter ops rest)
+             (swap! ops rest)
              (op)))]
 
       (dosync (apply push-node xs))
       (reify Iterator
         (has-more? [_] (not (empty? (deref ops))))
-        (next-value [_] (dosync (next-node)))))))
+        (next-value [_] (next-node))))))
 
 (defn test-post-order-iter []
   (let [tree [[[] 2 [3]] 4 [5]]
@@ -52,4 +52,4 @@
         (print (.next-value iter))
         (recur)))
     (println)))
-    
+
