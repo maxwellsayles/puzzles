@@ -22,9 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PostOrderIter
 {
@@ -48,11 +45,6 @@ namespace PostOrderIter
         delegate T Op();
         private Stack<Op> ops = new Stack<Op>();
 
-        private T OpValue(T v)
-        {
-            return v;
-        }
-
         private T OpNode(Tree<T> t)
         {
             PushNode(t);
@@ -63,7 +55,7 @@ namespace PostOrderIter
         {
             if (t != null)
             {
-                ops.Push(() => OpValue(t.v));
+                ops.Push(() => t.v);
                 ops.Push(() => OpNode(t.r));
                 ops.Push(() => OpNode(t.l));
             }

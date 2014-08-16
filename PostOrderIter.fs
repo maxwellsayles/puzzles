@@ -1,98 +1,52 @@
-﻿(**
- * Given a binary tree, provide a post order iterator.
- *
- * Here I provide four solutions, one imperative as a stateful iterator, and
- * three functional.  The first uses a stateful class to iterate over the sequence.
- * The second, uses a sequence to lazily yield the values in post order, the third
- * uses a left fold in post order, and the last uses continuations.
- *
- * NOTE: This is a solution to an interview question that expects a stateful iterator.
- * In practice, I would prefer the the second solution using a sequence to lazily
- * yield values.  If this feature was not available in the language, then I would
- * prefer continuations, and finally a left fold.
- *)
+﻿(* This is another implementation of a stateful post order binary tree iterator.
+   In this one, we build a stack of lambdas where each lambda represents the next
+   operation, and returns the next value.  See `PushNode` for the core functionality.
+*)
+type Tree<'a> = Empty | Node of Tree<'a> * 'a * Tree<'a>
 
-type Tree<'t> = Empty | Node of Tree<'t> * 't * Tree<'t>
+type PostOrderIter<'a>(root: Tree<'a>) as this =
+    let mutable ops : List<unit -> 'a> = []
+    do this.PushNode root
 
-let empty = Empty
-let singleton v = Node(empty, v, empty)
-let tree l v r = Node(l, v, r)
+    member this.HasNext: bool =
+        not <| List.isEmpty ops
 
-type Visit = LeftVisit | RightVisit | FinishedVisit
+    member this.Next(): 'a =
+        match ops with
+        | op :: opsTail ->
+            ops <- opsTail
+            op()
+        | _ -> failwith "no more ops"
 
-type PostOrderIterator<'T>(n: Tree<'T>) =
-    let mutable stack = [(n, LeftVisit)]
+    member private this.OpNode (t: Tree<'a>) =
+        this.PushNode t
+        this.Next()
 
-    member this.Next() =
-        match stack with
-        | [] -> None
-        | (topNode, topVisit) :: rest ->
-            match topNode with
-            // If the top of the stack is a leaf, continue with the next element.
-            | Empty ->
-                stack <- rest
-                this.Next()
-
-            // Either traverse the left child, the right child,
-            // or return the current
-            | Node(l, v, r) ->
-                match topVisit with
-                | LeftVisit ->
-                    stack <- (l, LeftVisit) :: (topNode, RightVisit) :: rest
-                    this.Next()
-                | RightVisit ->
-                    stack <- (r, LeftVisit) :: (topNode, FinishedVisit) :: rest
-                    this.Next()
-                | FinishedVisit ->
-                    stack <- rest
-                    Some(v)
-
-let rec iteratePostOrder<'T> (f: 'T -> unit) (iter: PostOrderIterator<'T>) =
-    match iter.Next() with
-    | None -> ()
-    | Some(v) ->
-        f(v)
-        iteratePostOrder f iter
-
-let rec seqPostOrder t =
-    match t with
-    | Empty -> Seq.empty
-    | Node(l, v, r) -> seq { yield! seqPostOrder l; yield! seqPostOrder r; yield v; }
-
-let foldPostOrder f z0 t =
-    let rec helper t acc =
+    member private this.PushNode(t: Tree<'a>) =
         match t with
-        | Empty -> acc
-        | Node(l, v, r) -> acc |> helper l |> helper r |> (fun acc -> f acc v)
-    helper t z0
-
-let contPostOrder f t =
-    let rec helper t k =
-        match t with
-        | Empty -> k()
         | Node(l, v, r) ->
-            helper l (fun () ->
-                helper r (fun () ->
-                    f(v)
-                    k()
-                )
-            )
-    helper t id
+            ops <- (fun () -> v) :: ops
+            ops <- (fun () -> this.OpNode r) :: ops
+            ops <- (fun () -> this.OpNode l) :: ops
+        | Empty -> ()
+
+let DoTree (t: Tree<'a>) =
+    let iter = new PostOrderIter<'a>(t)
+    while iter.HasNext do
+        printf "%A " <| iter.Next()
+    printfn ""
+
+let Singleton(v: 'a) =
+    Node(Empty, v, Empty)
+
+let Node3(l: 'a, v: 'a, r: 'a) =
+    Node(Singleton(l), v, Singleton(r))
 
 [<EntryPoint>]
-let main argv =
-    let t = tree (tree (singleton 4) 2 (singleton 5)) 1 (tree (singleton 6) 3 (singleton 7))
+let main argv = 
+    DoTree Empty
+    DoTree <| Singleton 1
+    DoTree <| Node3(1, 2, 3)
+    DoTree <| Node(Node3(1, 2, 3), 4, Node3(5, 6, 7))
     
-    iteratePostOrder (printf "%d") (new PostOrderIterator<int>(t))
-    printfn ""
-
-    seqPostOrder t |> Seq.iter (printf "%d")
-    printfn ""
-
-    foldPostOrder (fun acc x -> x :: acc) [] t |> List.rev |> Seq.iter (printf "%d")
-    printfn ""
-
-    contPostOrder (printf "%d") t
-    printfn ""
-
-    0
+    0 // return an integer exit code
