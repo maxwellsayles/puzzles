@@ -14,57 +14,33 @@ object Node {
   def apply[T](value: T): Node[T] = Node(Leaf, value, Leaf)
 }
 
-// Case objects to indicate the stage of node visitation.
-// This could also be done with an object that extends Enumeration.
-sealed trait Visit
-case object LeftVisit extends Visit
-case object RightVisit extends Visit
-case object FinishedVisit extends Visit
-
+/***
+ * Stateful post order binary tree iterator using lambdas.
+ */
 class PostOrderIter[T](t: Tree[T]) {
-  var stack: List[(Tree[T], Visit)] = List((t, LeftVisit))
+  var ops: List[() => T] = List()
+  pushNode(t)
 
-  def next(): Option[T] = {
-    // stack is empty, we are finished.
-    if (stack.isEmpty) return None
+  def hasNext(): Boolean = !ops.isEmpty
 
-    // otherwise, inspect the top element.
-    val (topNode, topVisit) :: rest = stack
-    topNode match {
-      // If it's a leaf, continue with the next element.
-      case Leaf =>
-        stack = rest
-        next()
-
-      // Either traverse the Left child, the Right child,
-      // or return the current
-      case Node(l, v, r) =>
-        topVisit match {
-          case LeftVisit =>
-            stack = (l, LeftVisit) :: (topNode, RightVisit) :: rest
-            next()
-          case RightVisit =>
-            stack = (r, LeftVisit) :: (topNode, FinishedVisit) :: rest
-            next()
-          case FinishedVisit =>
-            stack = rest
-            Some(v)
-        }
-    }
+  // Pop an op.
+  def next(): T = {
+    val op = ops.head
+    ops = ops.tail
+    op()
   }
-}
 
-def iterate[T](
-  f: T => Unit,
-  iter: PostOrderIter[T]
-) {
-  iter.next() match {
-    case None =>
-      return
+  private def pushNode: Tree[T] => Unit = {
+    case Node(l, v, r) =>
+      ops = (() => v) :: ops
+      ops = (() => opNode(r)) :: ops
+      ops = (() => opNode(l)) :: ops
+    case Leaf => ()
+  }
 
-    case Some(v) =>
-      f(v)
-      iterate(f, iter)
+  private def opNode(t: Tree[T]): T = {
+    pushNode(t)
+    next()
   }
 }
 
@@ -72,7 +48,7 @@ def iterate[T](
  * This is a standard post order iteration of a tree using continuations.
  * NOTE: This is my preferred solution to this problem.
  */
-def iterate2[T](
+def iterate[T](
   f: T => Unit,
   n: Tree[T],
   k: => Unit = {}
@@ -80,8 +56,8 @@ def iterate2[T](
   n match {
     case Leaf => k
     case Node(l, v, r) =>
-      iterate2(f, l, {
-        iterate2(f, r, {
+      iterate(f, l, {
+        iterate(f, r, {
           f(v)
           k
         })
@@ -91,9 +67,11 @@ def iterate2[T](
 
 def doTree(t: Tree[Int]) {
   val iter = new PostOrderIter(t)
-  iterate(print, iter)
+  while (iter.hasNext()) {
+    print(iter.next())
+  }
   print(' ')
-  iterate2(print, t)
+  iterate(print, t)
   println()
 }
 
