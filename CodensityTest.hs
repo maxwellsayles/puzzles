@@ -11,7 +11,6 @@ about the same performance metrics as the second solution.
 
 {-# LANGUAGE Rank2Types #-}
 
-import Control.Applicative
 import Control.Monad
 import Control.Monad.Trans
 import System.CPUTime
@@ -46,7 +45,7 @@ instance Show (Custom a) where
   show (Custom xs) = show $ length xs
 
 step :: (Monad m, Enum a) => a -> m a
-step x = return $ succ x
+step = return . succ
 
 -- Left fold using bind.
 solution1 =
