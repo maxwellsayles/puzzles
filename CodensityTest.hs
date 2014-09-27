@@ -2,7 +2,20 @@
 Using an intentially right associative monad, we show that computing with
 monadic composition or with the CodensityT monad can reduce the runtime.
 
-The first solution uses a left fold applying bind (>>=) to 10,000 monadic
+One way to visualize the operations in this program is to consider the series
+of operations
+  1 + 1 + 1 + 1 + 1 + ... + 1 + 1
+but where each addition takes time proportional to the left side input.
+
+If we left associate we get
+  ((((((1 + 1) + 1) + 1) + 1) + ...) + 1) + 1
+and the last addition costs (n - 1).  The sum of all additions is O(n^2).
+
+If we right associate we get
+  1 + (1 + (1 + (1 + (1 + (... + (1 + 1))))))
+and each addition costs 1 operation for a total O(n) operations.
+
+The first solution below uses a left fold applying bind (>>=) to 10,000 monadic
 functions.  The second solution uses a right fold applying Kleisli composition
 to the same 10,000 monadic functions, and is significantly faster.  The third and
 fourth solutions are left and right folds using the CodensityT monad, and have
@@ -56,7 +69,7 @@ solution1 =
 solution2 =
   let f' = foldr (>=>) (return :: Int -> Custom Int) $
            replicate 10000 step
-  in  f' 0
+  in  f' 1
 
 -- Left fold using CodensityT.
 solution3 =
@@ -68,7 +81,7 @@ solution3 =
 solution4 =
   let f' = foldr (>=>) (return :: Int -> CodensityT Custom Int) $
            replicate 10000 (lift . step)
-  in  lowerCodensityT $ f' 0
+  in  lowerCodensityT $ f' 1
 
 timeit x = do
   time1 <- getCPUTime
