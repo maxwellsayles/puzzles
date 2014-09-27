@@ -39,7 +39,7 @@ instance Monad Custom where
   return a = Custom [a]
   Custom (x:xs) >>= f =
     let Custom (y:ys) = f x
-    in  Custom $ (y:ys) ++ map (const y) (x:xs)
+    in  Custom $ map (const y) (x:xs) ++ (y:ys)
 
 instance Show (Custom a) where
   show (Custom xs) = show $ length xs
