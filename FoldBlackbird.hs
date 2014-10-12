@@ -1,5 +1,4 @@
 {- |
-
 Continuations let you turn left associative operations into right
 associative operations.
 -}
@@ -12,7 +11,8 @@ rightAssoc f = \k x y -> k $ f x y
 
 -- Or by lambdabot, we can write `rightAssoc` pointfree as...                         
 -- rightAssoc = flip ((.) . (.))
--- Using Data.Aviary.Birds this is
+
+-- Using Data.Aviary.Birds this is...
 -- rightAssoc = flip blackbird
 
 timeit x = do
