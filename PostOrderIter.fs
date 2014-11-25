@@ -18,7 +18,7 @@ type PostOrderIter<'a>(root: Tree<'a>) as this =
             op()
         | _ -> failwith "no more ops"
 
-    member private this.OpNode (t: Tree<'a>) =
+    member private this.OpNode(t: Tree<'a>) =
         this.PushNode t
         this.Next()
 
@@ -30,7 +30,7 @@ type PostOrderIter<'a>(root: Tree<'a>) as this =
             ops <- (fun () -> this.OpNode l) :: ops
         | Empty -> ()
 
-let DoTree (t: Tree<'a>) =
+let DoTree(t: Tree<'a>) =
     let iter = new PostOrderIter<'a>(t)
     while iter.HasNext do
         printf "%A " <| iter.Next()
