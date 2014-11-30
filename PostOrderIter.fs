@@ -18,11 +18,11 @@ type PostOrderIter<'a>(root: Tree<'a>) as this =
             op()
         | _ -> failwith "no more ops"
 
-    member private this.OpNode(t: Tree<'a>) =
+    member private this.OpNode(t: Tree<'a>): 'a =
         this.PushNode t
         this.Next()
 
-    member private this.PushNode(t: Tree<'a>) =
+    member private this.PushNode(t: Tree<'a>): unit =
         match t with
         | Node(l, v, r) ->
             ops <- (fun () -> v) :: ops
@@ -30,20 +30,20 @@ type PostOrderIter<'a>(root: Tree<'a>) as this =
             ops <- (fun () -> this.OpNode l) :: ops
         | Empty -> ()
 
-let DoTree(t: Tree<'a>) =
+let DoTree(t: Tree<'a>): unit =
     let iter = new PostOrderIter<'a>(t)
     while iter.HasNext do
         printf "%A " <| iter.Next()
     printfn ""
 
-let Singleton(v: 'a) =
+let Singleton(v: 'a): Tree<'a> =
     Node(Empty, v, Empty)
 
-let Node3(l: 'a, v: 'a, r: 'a) =
+let Node3(l: 'a, v: 'a, r: 'a): Tree<'a> =
     Node(Singleton(l), v, Singleton(r))
 
 [<EntryPoint>]
-let main argv = 
+let main(argv: string[]): int = 
     DoTree Empty
     DoTree <| Singleton 1
     DoTree <| Node3(1, 2, 3)
