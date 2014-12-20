@@ -18,6 +18,9 @@
 
 int solve(const std::string& input) {
   int n = input.size();
+  if (n == 0) {
+    return 0;
+  }
 
   // Base cases.
   int x0 = 1;
