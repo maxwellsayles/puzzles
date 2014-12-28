@@ -85,9 +85,9 @@ solution4 =
 
 timeit x = do
   time1 <- getCPUTime
-  print x
+  putStrLn $ "Value: " ++ show x
   time2 <- getCPUTime
-  print $ time2 - time1  
+  putStrLn $ "Time: " ++ show (time2 - time1)
 
 main = do
   timeit solution1
