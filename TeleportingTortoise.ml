@@ -63,12 +63,9 @@ let detect_tail_length f x u =
     if x == y then steps else together (f x) (f y) (steps + 1) in
   together x y 0
 
-(* Construct a linked list with a cycle of random length and then run the
+(* Construct a linked list with a specific cycle and tail length, and then run the
    teleporting tortoise detection algorithm and verify the results. *)
-let run_test() =
-  let cycle_length = 1 + Random.int 1000 in
-  let tail_length = Random.int 1000 in
-
+let run_test cycle_length tail_length =
   Printf.printf "Cycle length %d\n" cycle_length;
   Printf.printf "Tail length %d\n" tail_length;
 
@@ -85,8 +82,14 @@ let run_test() =
   else failwith "Something went horrible wrong!"
 
 let _ =
-  Random.self_init();
-  iterate run_test () 10000;
+  let n = 100 in
+  let rec tests cycle_length tail_length =
+    if tail_length = n then tests (cycle_length + 1) 0
+    else if cycle_length < n then begin
+      run_test cycle_length tail_length;
+      tests cycle_length (tail_length + 1);
+    end in
+  tests 1 0;
   0
 
 
