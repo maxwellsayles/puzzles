@@ -42,14 +42,21 @@
         (has-more? [_] (not (empty? (deref ops))))
         (next-value [_] (next-node))))))
 
-(defn test-post-order-iter []
-  (let [tree [[[] 2 [3]] 4 [5]]
-        iter (apply post-order-iter tree)]
-    (apply traverse tree)
-    (println)
-    (loop []
-      (when (.has-more? iter)
-        (print (.next-value iter))
-        (recur)))
-    (println)))
+(defn test-it [tree]
+  (let [iter (apply post-order-iter tree)
+        res1 (with-out-str (apply traverse tree))
+        res2 (with-out-str
+               (loop []
+                 (when (.has-more? iter)
+                   (print (.next-value iter))
+                   (recur))))]
+    (assert (= res1 res2))))
+
+(test-it [])
+(test-it [1])
+(test-it [[1] 2 []])
+(test-it [[] 2 [3]])
+(test-it [[1] 2 [3]])
+(test-it [[[1] 2 [3]] 4 [[5] 6 [7]]])
+(println "All tests passed.")
 
