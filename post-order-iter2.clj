@@ -11,7 +11,7 @@
   (letfn [(process-iter [i]
             (if (nil? i)
               nil
-              (let [[x k] i] (f x) (process-iter (k)))))]
+              (let [[x k] i] (f x) (recur (k)))))]
     (process-iter (post t (fn [] nil)))))
 
 (defn to-string [t] (with-out-str (post-order-iter print t)))
