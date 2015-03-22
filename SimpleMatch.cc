@@ -93,6 +93,8 @@ int main(int argc, char* argv[]) {
   assert(match("a*a*", "a"));
   assert(match("a*a*", "aa"));
   assert(match("a*a*", "ab") == false);
-  
+
+  assert(match("a*b*a", "a"));
+
   return 0;
 }
