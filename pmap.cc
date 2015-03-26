@@ -25,7 +25,7 @@ long squared_sum(long n) {
 int main(int argc, char* argv[]) {
   long n = 10000;
   std::vector<long> bs;
-  for (long i = 0; i < n; i++) {
+  for (long i = 0; i <= n; i++) {
     bs.emplace_back(i);
   }
   auto xs = pmap<long>(bs, [](long x) { return x * x; });
