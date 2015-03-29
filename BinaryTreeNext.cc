@@ -44,6 +44,7 @@ void updateNext(Node* root) {
     }
 
     // Move `cur` to the first node of the next row.
+    p->next = nullptr;
     cur = head.next;
   }
 }
@@ -101,6 +102,20 @@ int main(int argc, char* argv[]) {
   assert(d.next == nullptr);
   assert(b.next == &f);
   assert(f.next == nullptr);
+
+  //       g
+  //     /   \
+  //    a     d
+  //   / \
+  //  b   c
+  a.r = &c;
+  d.r = nullptr;
+  updateNext(&g);
+  assert(g.next == nullptr);
+  assert(a.next == &d);
+  assert(d.next == nullptr);
+  assert(b.next == &c);
+  assert(c.next == nullptr);
   
   return 0;
 }
