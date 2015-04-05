@@ -36,6 +36,9 @@ public:
 		  adj.end(),
 		  [&]() { return static_cast<bool>(dis(gen)); });
     
+    // Randomly choose whether we should have a famous person.
+    // NOTE: Even when this comes up false, we may have randomly
+    // generated a room with a famous person above.
     auto has_famous_person = static_cast<bool>(dis(gen));
     if (has_famous_person) {
       std::uniform_int_distribution<> disn(0, n - 1);
