@@ -32,17 +32,17 @@
 using namespace std;
 
 string add_int_to_string(const int i, const string& s) {
-  function<string(int)> last = [](int carry) {
+  function<string(int)> last = [](const int carry) {
     return carry == 0 ? string() : to_string(carry);
   };
-  auto step = [](function<string(int)> k, char x) {
-    return [k, x](int carry) {
+  auto step = [](auto k, const char x) {
+    return [k, x](const int carry) {
       int y = (carry % 10) + x - '0';
       int carry2 = (carry / 10) + (y / 10);
       return k(carry2) + to_string(y % 10);
     };
   };
-  return accumulate(s.begin(), s.end(), last, step)(i);
+  return accumulate(begin(s), end(s), last, step)(i);
 }
 
 /// This is how I would actually solve this problem.
