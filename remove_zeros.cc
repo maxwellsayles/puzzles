@@ -12,11 +12,11 @@
 
 void remove_zeros(std::vector<int>& v) {
   auto i = std::find(v.begin(), v.end(), 0);
-  auto j = std::find_if(i, v.end(), [](auto x) { return x != 0; });
+  auto j = std::find_if(i, v.end(), [](int x) { return x != 0; });
   while (j != v.end()) {
     std::swap(*i, *j);
     i = std::find(i, v.end(), 0);
-    j = std::find_if(j, v.end(), [](auto x) { return x != 0; });
+    j = std::find_if(j, v.end(), [](int x) { return x != 0; });
   }
   v.resize(std::distance(v.begin(), i));
 }
