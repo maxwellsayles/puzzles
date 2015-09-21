@@ -56,6 +56,8 @@ let Same (a: 'a node option) (b: 'a node option) : bool =
     let a' = ToList a
     let b' = ToList b
 
+    // NOTE: We use a function to defer computation because the lists
+    // might not be the same length.
     let iso() =
         // Build a set pairing elements from the two lists
         let m = new HashSet<'a node * 'a node>()
@@ -71,15 +73,18 @@ let Same (a: 'a node option) (b: 'a node option) : bool =
         let by = List.map (fun n -> n.y) b'
         List.forall f <| List.zip ay by
 
-    List.length a' <> List.length b' && iso()
+    let equalValue() =
+        List.forall (fun (a, b) -> a.v = b.v) <| List.zip a' b'
 
-let Duplicate (hd: 'a node option): 'a node option =    
+    List.length a' <> List.length b' && equalValue() && iso()
+
+let DuplicateImp(hd: 'a node option): 'a node option =    
     // Interleave a copy.
     let mutable h = hd
     while h.IsSome do
         let cur = h.Value
         h <- cur.x
-        cur.x <- Some({ x = cur.x; y = cur.y; v = cur.v })
+        cur.x <- Some { x = cur.x; y = cur.y; v = cur.v }
 
     // Bump the copy's `y` link forward one.
     let mutable h = hd
@@ -106,7 +111,7 @@ let Duplicate (hd: 'a node option): 'a node option =
 let main argv =
     let test n =
         let n' = FromList n
-        let d = Duplicate n'
+        let d = DuplicateImp n'
         assert(d <> n')
         assert(Same d n')
 
