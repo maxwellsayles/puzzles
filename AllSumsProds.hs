@@ -27,7 +27,7 @@ data Op = Add | Mul
 allVals :: [Int] -> [Op] -> Set Int
 allVals [x] [] = Set.singleton x
 allVals xs ops =
-  Set.fromList $ concat $ map Set.toList $ zipWith3 apply ls rs ops
+  foldr Set.union Set.empty $ zipWith3 apply ls rs ops
   where
     -- All possible left hand sides
     xsl = init $ tail $ inits xs
