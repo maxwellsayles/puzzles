@@ -28,10 +28,7 @@ type Op = Int -> Int -> Int
 -- Apply op to all pairs in the cartesian product of ls and rs
 applyOp :: Op -> Set Int -> Set Int -> Set Int
 applyOp op ls rs =
-  Set.fromList [op l r
-               | l <- Set.toList ls
-               , r <- Set.toList rs
-               ]
+  Set.fromList [op l r | l <- Set.toList ls, r <- Set.toList rs]
 
 allVals :: [Int] -> [Op] -> Set Int
 allVals [x] [] = Set.singleton x
@@ -61,10 +58,7 @@ allValsDp xs ops = opt ! (0, n - 1)
 
     opt :: Array (Int, Int) (Set Int)
     opt = array ((0, 0), (n - 1, n - 1))
-            [((i, j), helper i j)
-            | i <- [0..n - 1]
-            , j <- [i..n - 1]
-            ]
+            [((i, j), helper i j) | i <- [0..n - 1], j <- [i..n - 1]]
 
     helper i j
       | i == j = Set.singleton $ xs' ! i
