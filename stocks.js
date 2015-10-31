@@ -33,6 +33,6 @@ var stocks2 = function (pa, pb) {
 a = [2,8,1,2];
 b = [2,1,5,9];
 console.log(stocks1(a, b));
-console.log(stocksn(a, b))
+console.log(stocks2(a, b))
 
 
