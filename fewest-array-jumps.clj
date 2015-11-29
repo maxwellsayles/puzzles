@@ -9,6 +9,9 @@
 
 (use '[clojure.test :only (is)])
 
+;; Brute force O(n!) solution.  Given the current index and the distance we can
+;; jump, compute the solution for each reachable index and choose the solution
+;; with the fewest steps.
 (defn solve-brute [& xs1]
   (let [xs (vec xs1)
         n (count xs)]
@@ -21,6 +24,9 @@
                  (reduce #(if (<= (count %1) (count %2)) %1 %2) cs))))]
     (helper 0))))
 
+;; Jump over the input with `p` as the source jump point, `i` as the first
+;; untested index, and `q` as the target jump point (i.e. the index reachable
+;; from `p` where the next jump is the furthest).
 (defn solve-greedy
   ([] '())
   ([& xs1]
@@ -36,6 +42,26 @@
                              j (range i (inc j)))]
                (recur q (inc j) (conj acc p)))))))))
 
+;; And of course, if you iterate over a list, touching each element only once,
+;; you can use `reduce`.  This keeps the current interval [p, q] and the iterval
+;; [bi, bj] with the furthest end point that can be jumped to from the current
+;; interval.  Whenever we finish the current interval, we "jump" and update
+;; the loop values.  The final jump is performed outside the `reduce`.
+(defn solve-reduce
+  ([] '())
+  ([& xs]
+     (let [base {:p 0, :q (first xs), :i 0, :bi 0, :bj (first xs), :js '()}
+           step (fn [acc x]
+                  (let [{:keys [p q i bi bj js]} acc
+                        j (+ i x)
+                        [ni nj] (if (>= bj j) [bi bj] [i j])]
+                    (if (< i q)
+                      {:p p, :q q, :i (inc i), :bi ni, :bj nj, :js js}
+                      {:p ni, :q nj, :i (inc i), :bi ni, :bj nj, :js (conj js p)})))
+           {fp :p fjs :js} (reduce step base xs)]
+       (reverse (conj fjs fp)))))
+
+;; Determine if `steps` is a valid solution given `xs`.
 (defn valid? [xs1 steps]
   (let [xs (vec xs1)
         n (count xs)
@@ -64,12 +90,16 @@
             ;; every step is reachable from last
             (every? true? (map reachable? steps (rest steps)))))))
 
+;; A solution is considered "optimal" if it's both valid and the same number
+;; of steps as the brute force solution.
 (defn optimal? [& xs]
   (let [brute (apply solve-brute xs)
-        greedy (apply solve-greedy xs)]
+        greedy (apply solve-greedy xs)
+        reduced (apply solve-reduce xs)]
     (and (valid? xs brute)
          (valid? xs greedy)
-         (= (count brute) (count greedy)))))
+         (valid? xs reduced)
+         (= (count brute) (count greedy) (count reduced)))))
 
 (defn test-suite [solve]
   (is (empty? (solve)))
@@ -84,11 +114,14 @@
 
 (test-suite solve-brute)
 (test-suite solve-greedy)
+(test-suite solve-reduce)
 
 (println "Passed deterministic unit tests.")
-  
-(doseq [n (range 1 20)]
-  (let [xs (repeatedly n #(inc (rand-int 10)))]
-    (is (apply optimal? xs))))
 
+(doseq [i (range 1 10)]
+  (print "Randomized test" i "of 10.\r")
+  (flush)
+  (doseq [n (range 1 20)]
+    (let [xs (repeatedly n #(inc (rand-int 10)))]
+      (is (apply optimal? xs)))))
 (println "Passed randomized unit tests.")
