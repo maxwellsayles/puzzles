@@ -9,10 +9,24 @@
 
 (use '[clojure.test :only (is)])
 
-;; Brute force O(n!) solution.  Given the current index and the distance we can
-;; jump, compute the solution for each reachable index and choose the solution
-;; with the fewest steps.
-(defn solve-brute [& xs1]
+(defn tails [& xs] (reductions (fn [s _] (rest s)) xs xs))
+
+;; Brute force O(n!) solution.  An empty list produces an empty list.  Otherwise
+;; we solve repeatedly for one fewer item as far as we can jump, and select the
+;; solution with the fewest jumps.
+(defn solve-brute
+  ([] '())
+  ([x & xs]
+     (let [bs (map #(apply solve-brute %1) (apply tails xs))
+           ys (map #(map (partial + %1) %2) (iterate inc 1) bs)
+           zs (take x ys)
+           js (reduce #(if (<= (count %1) (count %2)) %1 %2) zs)]
+       (conj js 0))))
+
+;; Another brute force O(n!) solution.  Given the current index and the distance
+;; we can jump, compute the solution for each reachable index and choose the
+;; solution with the fewest steps.
+(defn solve-brute2 [& xs1]
   (let [xs (vec xs1)
         n (count xs)]
     (letfn
@@ -94,6 +108,7 @@
 ;; of steps as the brute force solution.
 (defn optimal? [& xs]
   (let [brute (apply solve-brute xs)
+        brute2 (apply solve-brute2 xs)
         greedy (apply solve-greedy xs)
         reduced (apply solve-reduce xs)]
     (and (valid? xs brute)
@@ -105,7 +120,9 @@
   (is (empty? (solve)))
   (is (= '(0) (solve 1)))
   (is (= '(0 1) (solve 1 1)))
+  (is (= '(0) (solve 2 1)))
   (is (= '(0 1 2) (solve 1 1 1)))
+  (is (= '(0) (solve 3 1 1)))
   (is (= '(0) (solve 5 1 7 1 1)))
   (is (= '(0 2) (solve 5 1 7 1 1 1)))
   (is (= '(0 5) (solve 5 1 7 1 1 100 1 1 1 1 1 1)))
@@ -113,6 +130,7 @@
     (is (valid? xs (apply solve xs)))))
 
 (test-suite solve-brute)
+(test-suite solve-brute2)
 (test-suite solve-greedy)
 (test-suite solve-reduce)
 
