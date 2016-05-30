@@ -23,9 +23,6 @@ ending with an element z >= x.
 
 -}
 
-
-import Control.Applicative
-import Data.Array
 import Data.List
 import qualified Data.Map.Lazy as M
 import Data.Ord
@@ -33,17 +30,13 @@ import Test.QuickCheck
 
 solveDp :: Ord a => [a] -> [a]
 solveDp [] = []
-solveDp xs = reverse $ snd $ maximumBy (comparing fst) $ elems opt
-  where n = length xs
-        xs' = listArray (1, n) xs
-        opt = listArray (1, n) $ (1, [head xs]) : [f i | i <- [2..n]]
-        f i = let x = xs' ! i
-                  ps = filter ((< x) . head . snd) $
-                       [opt ! j | j <- [1..i-1]]
-                  (m, ys) | null ps = (0, [])
-                          | otherwise = maximumBy (comparing fst) ps
-              in (m + 1, x : ys)
-        
+solveDp xs = reverse $ snd $ maximumBy (comparing fst) $ foldl' step [] xs
+  where step acc x =
+          let ps = filter ((< x) . head . snd) acc
+              (n, ys) | null ps = (0, [])
+                      | otherwise = maximumBy (comparing fst) ps
+          in (n + 1, x : ys) : acc
+
 solveMap :: Ord a => [a] -> [a]
 solveMap [] = []
 solveMap xs = reverse $ snd $ head $ M.toDescList $ foldl' step M.empty xs
@@ -53,10 +46,9 @@ solveMap xs = reverse $ snd $ head $ M.toDescList $ foldl' step M.empty xs
           in M.insert x (x:ys) m'
 
 verify :: Ord a => [a] -> Bool
-verify xs =
-  let ys = solveDp xs
-      zs = solveMap xs
-  in length ys == length zs && sort ys == ys && sort zs == zs
+verify xs = let ys = solveDp xs
+                zs = solveMap xs
+            in length ys == length zs && sort ys == ys && sort zs == zs
 
 main :: IO ()
 main = let args = stdArgs { maxSuccess = 1000, maxSize = 1000 }
