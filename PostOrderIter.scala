@@ -14,7 +14,7 @@ object Node {
   def apply[T](value: T): Node[T] = Node(Leaf, value, Leaf)
 }
 
-/***
+/**
  * Stateful post order binary tree iterator using lambdas.
  */
 class PostOrderIter[T](t: Tree[T]) {
@@ -23,7 +23,6 @@ class PostOrderIter[T](t: Tree[T]) {
 
   def hasNext(): Boolean = !ops.isEmpty
 
-  // Pop an op.
   def next(): T = {
     val op = ops.head
     ops = ops.tail
@@ -33,14 +32,9 @@ class PostOrderIter[T](t: Tree[T]) {
   private def pushNode: Tree[T] => Unit = {
     case Node(l, v, r) =>
       ops = (() => v) :: ops
-      ops = (() => opNode(r)) :: ops
-      ops = (() => opNode(l)) :: ops
+      ops = (() => { pushNode(r); next() }) :: ops
+      ops = (() => { pushNode(l); next() }) :: ops
     case Leaf => ()
-  }
-
-  private def opNode(t: Tree[T]): T = {
-    pushNode(t)
-    next()
   }
 }
 
