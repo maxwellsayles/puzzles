@@ -71,7 +71,17 @@ nearestGT xs = map (fmap (n - 1 -)) $
 data Solution = Solution { start :: Int
                          , end :: Int
                          , height :: Int
-                         } deriving Show
+                         } deriving (Eq, Show)
+
+instance Ord Solution where
+  s1@(Solution i1 j1 h1) `compare` s2@(Solution i2 j2 h2)
+    | area s1 > area s2 = GT
+    | area s1 < area s2 = LT
+    | i1 < i2 = GT
+    | i1 > i2 = LT
+    | j1 < j2 = GT
+    | j1 > j2 = LT
+    | otherwise = EQ
 
 area :: Solution -> Int
 area s = (end s - start s + 1) * (height s)
@@ -87,8 +97,7 @@ shift x (Solution i j h) = Solution (i + x) (j + x) h
 -}
 histArea :: [Int] -> Solution
 histArea [] = Solution 0 0 0
-histArea xs = maximumBy (comparing area) $
-              zipWith3 solve xs (nearestLT xs) (nearestGT xs)
+histArea xs = maximum $ zipWith3 solve xs (nearestLT xs) (nearestGT xs)
   where n = length xs
         solve x lt gt = Solution i j x
           where i = 1 + fromMaybe (-1) lt
@@ -106,7 +115,7 @@ histAreaDNQ xs =
       lsol = histAreaDNQ ls
       rsol = shift m $ histAreaDNQ rs
       msols = helper (m - 1) m (min (head ls') (head rs)) (tail ls') (tail rs)
-  in maximumBy (comparing area) $ lsol : rsol : msols
+  in maximum $ lsol : rsol : msols
   where
     helper i j h [] [] = [Solution i j h]
     helper i j h [] (r:rs) =
@@ -120,8 +129,7 @@ histAreaDNQ xs =
 -- | Straightforward O(n^2) approach.
 histAreaSane :: [Int] -> Solution
 histAreaSane [] = Solution 0 0 0
-histAreaSane xs = maximumBy (comparing area) $
-                  concat $
+histAreaSane xs = maximum $ concat $
                   zipWith4 helper [0..] [0..] xs (tail $ tails xs)
   where 
     helper i j h [] = [Solution i j h]
