@@ -61,10 +61,7 @@ nearestLT xs = elems opt
 
 -- | Compute the nearest index to the right with a value < the given index.
 nearestGT :: [Int] -> [Maybe Int]
-nearestGT xs = map (fmap (n - 1 -)) $
-               reverse $
-               nearestLT $
-               reverse xs
+nearestGT xs = map (fmap (n - 1 -)) $ reverse $ nearestLT $ reverse xs
   where n = length xs
 
 -- | `start` and `end` are inclusive
