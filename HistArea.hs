@@ -1,5 +1,4 @@
 {-|
-
 Given a histogram with positive integral values, find a rectangle of largest
 area contained within the histogram.
 
@@ -35,8 +34,6 @@ and right with a value < the given cell.  We use this to compute the rectangle
 of maximum area of the hegiht of that cell.   We can do this in O(n) time as
 well.
 -}
-
--- TODO: Verify solution fits within histogram
 
 import Control.Monad
 import Data.Array.IArray
