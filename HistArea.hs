@@ -1,3 +1,41 @@
+{-|
+
+Given a histogram with positive integral values, find a rectangle of largest
+area contained within the histogram.
+
+We provide three approaches.  A straighforward approach of O(n^2), a
+divide-and-conquer approach of O(nlogn), and an approach using precomputation
+that takes O(n).
+
+A straightforward solution is for each index i, and each index j >= i, consider
+the largest rectangle from [i,j] contained in the histogram.  We can do this in
+O(n^2) time by iterating i and j and updating the rectangle height with each new
+j.
+
+The divide-and-conquer approach divides the list in two halves and recurses on
+each half.  Assume we know the largest rectangle on the left and right.  We then
+compute the largest largest rectangle that straddles the two halves.  We do this
+by iterating from the middle outwards.  At each iteration, we either append the
+next cell to the left or right, whichever is taller, and then adjust the height
+of the rectangle appropriately.  Since there are O(logn) levels and each level
+requires O(n) operations, this gives O(nlogn) runtime.
+
+The approach using precomputation requires us to first compute the nearest index
+to the left and right of each cell with a value < the given cell.  To compute
+the left variant, we start at the leftmost cell.  There is no possible index to
+the left.  This is the base case.  Then we iterate to the right.  For each cell,
+check the computed value of the cell immediately to the left.  It either has no
+lower value, in which case, the current cell has no lower value, or we get the
+nearest index to the left with a lower value.  We jump to that index and check
+its value.  If it is less than the initial cell, we stop.  Otherwise we repeat.
+Since each cell is visited at most once, this is O(n) time.
+
+After precomputing, for each cell, we can quickly look up the index to the left
+and right with a value < the given cell.  We use this to compute the rectangle
+of maximum area of the hegiht of that cell.   We can do this in O(n) time as
+well.
+-}
+
 -- TODO: Verify solution fits within histogram
 
 import Control.Monad
@@ -8,6 +46,7 @@ import Data.Ord
 import Test.HUnit
 import Test.QuickCheck
 
+-- | Compute the nearest index to the left with a value < the given index.
 nearestLT :: [Int] -> [Maybe Int]
 nearestLT xs = elems opt
   where
@@ -23,6 +62,7 @@ nearestLT xs = elems opt
       | xs' ! i < x = return i
       | otherwise = helper x =<< opt ! i
 
+-- | Compute the nearest index to the right with a value < the given index.
 nearestGT :: [Int] -> [Maybe Int]
 nearestGT xs = map (fmap (n - 1 -)) $
                reverse $
@@ -42,6 +82,12 @@ area s = (end s - start s + 1) * (height s)
 shift :: Int -> Solution -> Solution
 shift x (Solution i j h) = Solution (i + x) (j + x) h
 
+{-| For each cell, find the largest rectangle of the height of that cell.
+    This precomputes the nearest index to the left and right of each cell
+    with a value < the current cell.  This is used to efficiently look up
+    the largest rectangle for that cell.  The precomputation takes O(n)
+    and the routine here performs O(n) lookups.
+-}
 histArea :: [Int] -> Solution
 histArea [] = Solution 0 0 0
 histArea xs = maximumBy (comparing area) $
@@ -51,6 +97,7 @@ histArea xs = maximumBy (comparing area) $
           where i = 1 + fromMaybe (-1) lt
                 j = (-1) + fromMaybe n gt
 
+-- | Divide-and-conquer O(nlogn) solution.
 histAreaDNQ :: [Int] -> Solution
 histAreaDNQ [] = Solution 0 0 0
 histAreaDNQ [x] = Solution 0 0 x
@@ -73,6 +120,7 @@ histAreaDNQ xs =
       | l > r = Solution i j h : helper (i - 1) j (min h l) ls (r:rs)
       | otherwise = Solution i j h : helper i (j + 1) (min h r) (l:ls) rs
 
+-- | Straightforward O(n^2) approach.
 histAreaSane :: [Int] -> Solution
 histAreaSane [] = Solution 0 0 0
 histAreaSane xs = maximumBy (comparing area) $
@@ -81,13 +129,27 @@ histAreaSane xs = maximumBy (comparing area) $
   where 
     helper i j h [] = [Solution i j h]
     helper i j h (x:xs) = Solution i j h : helper i (j + 1) (min h x) xs
-  
+
+isValid :: [Int] -> Solution -> Bool
+isValid [] (Solution 0 0 0) = True
+isValid xs (Solution i j h) =
+  let n = length xs
+  in  i >= 0 && i < n && j >= 0 && j < n && i <= j &&
+      (all (>= h) $ take (j - i + 1) $ drop i xs)
+
+-- | Given a sample input and expected value, test each approach.
 testArea :: [Int] -> Int -> Test
-testArea xs exp = TestList
-           [ area (histAreaSane xs) ~?= exp
-           , area (histAreaDNQ xs) ~?= exp
-           , area (histArea xs) ~?= exp
-           ]
+testArea xs exp =
+  let a = histAreaSane xs
+      b = histAreaDNQ xs
+      c = histArea xs
+  in TestList [ area a ~?= exp
+              , area b ~?= exp
+              , area c ~?= exp
+              , isValid xs a ~?= True
+              , isValid xs b ~?= True
+              , isValid xs c ~?= True
+              ]
 
 tests :: Test
 tests = TestList
@@ -122,10 +184,11 @@ instance Arbitrary TestInput where
 
 testSame :: TestInput -> Bool
 testSame (TestInput xs) =
-  let a = area $ histAreaSane xs
-      b = area $ histAreaDNQ xs
-      c = area $ histArea xs
-  in a == b && b == c
+  let a = histAreaSane xs
+      b = histAreaDNQ xs
+      c = histArea xs
+  in area a == area b && area b == area c &&
+     isValid xs a && isValid xs b && isValid xs c
 
 main :: IO ()
 main = runTestTT tests >>
