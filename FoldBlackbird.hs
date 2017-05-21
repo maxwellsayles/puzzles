@@ -1,13 +1,20 @@
 {- |
 Continuations let you turn left associative operations into right
 associative operations.
+
+This is particularly useful for (++) when using foldl or any operator whose
+runtime depends on the size of the left input, as it effectively converts the
+foldl into a foldr.
+
+Special attention should be given for (-) or any operator that does produce the
+same result with foldl and foldr.
 -}
 
 import Data.List
 import System.CPUTime
 
 rightAssoc :: (a -> b -> c) -> (c -> d) -> a -> b -> d
-rightAssoc f = \k x y -> k $ f x y
+rightAssoc = \f k x y -> k $ f x y
 
 -- Or by lambdabot, we can write `rightAssoc` pointfree as...                         
 -- rightAssoc = flip ((.) . (.))
