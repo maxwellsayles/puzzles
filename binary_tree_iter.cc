@@ -5,7 +5,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
-#include <vector>
+#include <stack>
 
 template<typename T>
 class btree;
@@ -53,8 +53,8 @@ public:
 
   T next() {
     assert(!stack_.empty());
-    auto fnc = stack_.back();
-    stack_.pop_back();
+    auto fnc = stack_.top();
+    stack_.pop();
     return fnc();
   }
 
@@ -64,7 +64,7 @@ public:
 
 protected:
   virtual void pushNode(const btree_ptr<T>& t) = 0;
-  std::vector<std::function<T()>> stack_;
+  std::stack<std::function<T()>> stack_;
 };
 
 template<typename T>
@@ -77,18 +77,18 @@ protected:
   void pushNode(const btree_ptr<T>& t) override {
     assert(t != nullptr);
     if (t->r_ != nullptr) {
-      stack_.emplace_back([this, &t] {
+      stack_.emplace([this, &t] {
 	  pushNode(t->r_);
 	  return next();
 	});
     }
     if (t->l_ != nullptr) {
-      stack_.emplace_back([this, &t] {
+      stack_.emplace([this, &t] {
 	  pushNode(t->l_);
 	  return next();
 	});
     }
-    stack_.emplace_back([this, &t] { return t->t_; });
+    stack_.emplace([this, &t] { return t->t_; });
   }
 };
 
@@ -102,14 +102,14 @@ protected:
   void pushNode(const btree_ptr<T>& t) override {
     assert(t != nullptr);
     if (t->r_ != nullptr) {
-      stack_.emplace_back([this, &t] {
+      stack_.emplace([this, &t] {
 	  pushNode(t->r_);
 	  return next();
 	});
     }
-    stack_.emplace_back([this, &t] { return t->t_; });
+    stack_.emplace([this, &t] { return t->t_; });
     if (t->l_ != nullptr) {
-      stack_.emplace_back([this, &t] {
+      stack_.emplace([this, &t] {
 	  pushNode(t->l_);
 	  return next();
 	});
@@ -126,15 +126,15 @@ protected:
 
   void pushNode(const btree_ptr<T>& t) override {
     assert(t != nullptr);
-    stack_.emplace_back([this, &t] { return t->t_; });
+    stack_.emplace([this, &t] { return t->t_; });
     if (t->r_ != nullptr) {
-      stack_.emplace_back([this, &t] {
+      stack_.emplace([this, &t] {
 	  pushNode(t->r_);
 	  return next();
 	});
     }
     if (t->l_ != nullptr) {
-      stack_.emplace_back([this, &t] {
+      stack_.emplace([this, &t] {
 	  pushNode(t->l_);
 	  return next();
 	});
