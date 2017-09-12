@@ -1,6 +1,6 @@
 {-- A peak is an index `i` such that `arr ! (i - 1) < arr ! i < arr ! (i + 1)`.
 This uses a O(logn) approach to find any peak. Out of bounds is considered to
-be \inf.
+be -\inf.
 --}
 
 import Data.Array.IArray
@@ -8,32 +8,33 @@ import Data.Array.Base (UArray)
 import Data.List
 import Test.QuickCheck
 
-pickAnyPeak :: (Integral ix, Ord e, Ix ix, IArray arr e) => arr ix e -> Maybe ix
+pickAnyPeak :: (Integral ix, Ix ix, Ord e, Enum e, IArray arr e)
+            => arr ix e -> ix
 pickAnyPeak arr = fnc x y
   where (x, y) = bounds arr
         fnc i j
-          | m == x = Nothing
-          | m == y = Nothing
-          | arr ! m < arr ! (m + 1) = fnc (m + 1) j
-          | arr ! m < arr ! (m - 1) = fnc i (m - 1)
-          | otherwise = Just m
+          | b < c = fnc (m + 1) j
+          | b < a = fnc i (m - 1)
+          | otherwise = m
           where m = i + (j - i) `div` 2
+                a = if m == x then pred b else arr ! (m - 1)
+                b = arr ! m
+                c = if m == y then pred b else arr ! (m + 1)
 
-isPeak :: (Num ix, Ord e, Ix ix, IArray arr e) => arr ix e -> ix -> Bool
-isPeak arr i
-  | i - 1 < x = False
-  | i + 1 > y = False
-  | otherwise = arr ! (i - 1) < arr ! i && arr ! i > arr ! (i + 1)
+isPeak :: (Enum e, Ord e, Num ix, Ix ix, IArray arr e) => arr ix e -> ix -> Bool
+isPeak arr i = a < b && b > c
   where (x, y) = bounds arr
+        a = if i == x then pred b else arr ! (i - 1)
+        b = arr ! i
+        c = if i == y then pred b else arr ! (i + 1)
 
 testPeak :: [Int] -> Bool
-testPeak list =
-  let list' = nub list in
-  let arr = listArray (1, length list') list' :: UArray Int Int in
-  let peak = pickAnyPeak arr in
-  case peak of
-    Just p -> isPeak arr p
-    Nothing -> True
+testPeak [] = True
+testPeak list = isPeak arr peak
+  where list' = nub list
+        n = length list'
+        arr = listArray (1, n) list' :: UArray Int Int
+        peak = pickAnyPeak arr
 
 main :: IO ()
 main = quickCheckWith stdArgs { maxSuccess = 10000 } testPeak
