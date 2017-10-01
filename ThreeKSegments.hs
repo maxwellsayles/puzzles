@@ -14,6 +14,8 @@ import Control.Monad
 import Data.Foldable
 import Test.QuickCheck
 
+import qualified Data.Vector as V
+
 segmentSums :: Num a => Int -> [a] -> [a]
 segmentSums k xs = scanl (+) (sum $ take k xs) $ zipWith (-) (drop k xs) xs
 
@@ -27,17 +29,21 @@ solve k xs =
       ss = drop k $ segmentSums k xs
   in maximum $ zipWith (+) ls $ zipWith (+) ss rs
 
--- This is actually pretty poor. Probably O(k * n^3).
+{-
+This is actually pretty poor. It takes advantage of precomputing the segment
+sums, but it's still O(n^3).
+-}
 solvePoorly :: (Num a, Ord a) => Int -> [a] -> a
 solvePoorly k xs =
-  maximum [f a + f b + f c
-          | a <- [0..n-3*k]
-          , b <- [a+k..n-2*k]
-          , c <- [b+k..n-k]
+  maximum [yvec V.! a + yvec V.! b + yvec V.! c
+          | a <- [0..n-2*k]
+          , b <- [a+k..n-k]
+          , c <- [b+k..n]
           ]
-  where f i = sum $ take k $ drop i xs
-        n = length xs
-
+  where n = length ys - 1
+        ys = segmentSums k xs
+        yvec = V.fromList ys
+        
 data TestInput = TestInput Int [Int] deriving Show
 
 instance Arbitrary TestInput where
