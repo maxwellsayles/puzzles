@@ -19,13 +19,10 @@ import qualified Data.Vector as V
 segmentSums :: Num a => Int -> [a] -> [a]
 segmentSums k xs = scanl (+) (sum $ take k xs) $ zipWith (-) (drop k xs) xs
 
-maxSegment :: (Num a, Ord a) => Int -> [a] -> [a]
-maxSegment k xs = scanl1 max $ segmentSums k xs
-
 solve :: (Num a, Ord a) => Int -> [a] -> a
 solve k xs =
-  let ls = maxSegment k xs
-      rs = drop (2 * k) $ reverse $ maxSegment k $ reverse xs
+  let ls = scanl1 max $ segmentSums k xs
+      rs = scanr1 max $ drop (2 * k) $ segmentSums k xs
       ss = drop k $ segmentSums k xs
   in maximum $ zipWith (+) ls $ zipWith (+) ss rs
 
@@ -56,4 +53,4 @@ testIt :: TestInput -> Bool
 testIt (TestInput k xs) = solve k xs == solvePoorly k xs
 
 main :: IO ()
-main = quickCheck testIt
+main = quickCheckWith (stdArgs { maxSuccess = 1000 }) testIt
