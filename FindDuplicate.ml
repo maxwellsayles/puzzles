@@ -8,8 +8,7 @@ elements of values [0..N-1].
 let make_list len =
   let arr = Array.make len 0 in
   let rec loop i =
-    if i = len
-    then arr
+    if i = len then arr
     else begin
       Array.set arr i (Random.int len);
       loop (i + 1)
