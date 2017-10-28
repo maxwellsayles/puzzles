@@ -35,10 +35,11 @@ segmentSums k xs = scanl (+) (sum $ take k xs) $ zipWith (-) (drop k xs) xs
 
 solve :: (Num a, Ord a) => Int -> [a] -> a
 solve k xs =
-  let ls = scanl1 max $ segmentSums k xs
-      rs = scanr1 max $ drop (2 * k) $ segmentSums k xs
-      ss = drop k $ segmentSums k xs
-  in maximum $ zipWith (+) ls $ zipWith (+) ss rs
+  let ss = segmentSums k xs
+      ls = scanl1 max ss
+      rs = scanr1 max $ drop (2 * k) ss
+      ms = drop k ss
+  in maximum $ zipWith (+) ls $ zipWith (+) ms rs
 
 solveDP :: (Num a, Ord a) => Int -> [a] -> a
 solveDP k xs = maximum $ loop (segmentSums k xs) (repeat 0) 3
