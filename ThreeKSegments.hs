@@ -2,12 +2,26 @@
 Given an array of integers, find 3 non-overlapping segments each of k elements
 where the sum of the elements covered by the segments is maximal.
 
-The strategy is this. First, from left to right, walk one segment of k elements.
-At each index, store the largest sum that can be made with a segment ending at
-that index. Do the same from right to left. Then for each index, place the
-middle segment and in constant time, look up the largest sum made by a segment
-covering it the section to the left and to the right. Since each stage takes
-O(n) time and requires O(n) memory, the solution is O(n) time and memory.
+We present 3 solutions. Each solution makes use of a common function to
+precompute segment sums ta each starting position.
+
+`solvePoorly` implements the straightforward O(n^3) approach of placing each
+segment in each position.
+
+`solve` improves on this slightly by computing for each position, the maximum
+segment sum to the left and to the right of this position. Then it needs only
+to place the middle segment at each position, and it can efficiently look up
+the maximum segment sum of the segment to the left and to the right. This
+requires O(n) time.
+
+`solveDP` iteratively builds a solution one segment at a time for each position.
+First it computes the maximum segment sum for a single segment. Then for each
+position, it computes the maximum that can be earned by placing a second segment
+in each position and using the previous solution, it can efficiently compute
+the maximum for a solution to the left on one fewer segment. This is then
+repeated for the third segment. This solution is also O(n), but has the
+additional property that it can be used to generate solutions for arbitrary `c`
+segments in O(nc) time.
 -}
 
 import Control.Monad
@@ -25,6 +39,14 @@ solve k xs =
       rs = scanr1 max $ drop (2 * k) $ segmentSums k xs
       ss = drop k $ segmentSums k xs
   in maximum $ zipWith (+) ls $ zipWith (+) ss rs
+
+solveDP :: (Num a, Ord a) => Int -> [a] -> a
+solveDP k xs = maximum $ loop (segmentSums k xs) (repeat 0) 3
+  where loop _ ms 0 = ms
+        loop ss ms c =
+          let ss' = drop k ss
+              ms' = scanl1 max $ zipWith (+) ss ms
+          in  loop ss' ms' (c - 1)
 
 {-
 This is actually pretty poor. It takes advantage of precomputing the segment
@@ -50,7 +72,9 @@ instance Arbitrary TestInput where
     return $ TestInput k xs
 
 testIt :: TestInput -> Bool
-testIt (TestInput k xs) = solve k xs == solvePoorly k xs
+testIt (TestInput k xs) =
+  solve k xs == solvePoorly k xs &&
+  solve k xs == solveDP k xs
 
 main :: IO ()
 main = quickCheckWith (stdArgs { maxSuccess = 1000 }) testIt
