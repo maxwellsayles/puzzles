@@ -1,44 +1,46 @@
-(* An implementation of Brent's cycle finding -- the teleporting tortoise.
-
+(*
 In particular, this is used to find a duplicate element in an array of N
-elements of values [0..N-1].
+elements of values [0..N-2].
 *)
 
-(* Construct an array of `len` random elements from 0 to n-1. *)
+(* Construct an array of `len` random elements from 0 to n-2. *)
 let make_list len =
-  let arr = Array.make len 0 in
-  let rec loop i =
-    if i = len then arr
-    else begin
-      Array.set arr i (Random.int len);
-      loop (i + 1)
-    end
-  in
-  loop 0
+  Array.map (fun _ -> Random.int (len - 1)) (Array.make len 0)
 
-(* Detects the duplicate value. The algorithm works by planting a tortoise and
-   advancing a hare. After `power` number of steps, if the hare hasn't caught the
-   tortoise, the tortoise is teleported to catch the hare and `power` is doubled.
-   This way, eventually the hare takes a number of steps more than the cycle length
-   and the sum of all the steps taken in 2n-1. *)
 let detect_duplicate arr =
   let n = Array.length arr in
-  let next idx = (idx + 1) mod n in
+  let next i = Array.get arr i in
 
-  let rec loop hare tortoise steps power =
-    let x = Array.get arr tortoise in
-    let y = Array.get arr hare in
-    if x = y && tortoise <> hare then x
-    else if steps = power then loop hare hare 0 (power * 2)
-    else loop (next hare) tortoise (steps + 1) power in
+  (* Step j forward c times *)
+  let rec jump j c =
+    if c == 0 then j else jump (next j) (c - 1)
+  in
 
-  loop 0 0 0 1
+  (* Find an index that is definitely on the loop starting from index n - 1 *)
+  let start = jump (n - 1) (n - 1) in
+
+  (* Step until we determine the cycle length *)
+  let length =
+    let rec fnc j acc =
+      if j == start then acc else fnc (next j) (acc + 1)
+    in fnc (next start) 1
+  in
+  Printf.printf "length: %d\n" length;
+
+  (* Find the first point before the cycle; this is the duplicate element *)
+  let j = jump (n - 1) (n - length) in
+  Array.get arr j
 
 let _ =
   Random.self_init();
 
-  let n = 100 in
-  let arr = make_list n in
+  let n = 10 in
+  let arr = Array.of_list [6; 8; 0; 1; 0; 2; 4; 3; 7; 5;] in
+
+(*  let arr = make_list n in*)
+
+
+  (* 6 8 0 0 0 2 4 5 7 5 *)
 
   Printf.printf "Input array: %s\n"
     (String.concat " " (List.map string_of_int (Array.to_list arr)));
