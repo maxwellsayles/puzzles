@@ -1,7 +1,5 @@
-(*
-In particular, this is used to find a duplicate element in an array of N
-elements of values [0..N-2].
-*)
+(* An implementation of the tortoise and the hare used to find a duplicate in
+   an array of N elements of values [0..N-2] guaranteed to have a duplicate. *)
 
 (* Construct an array of `len` random elements from 0 to n-2. *)
 let make_list len =
@@ -11,36 +9,33 @@ let detect_duplicate arr =
   let n = Array.length arr in
   let next i = Array.get arr i in
 
-  (* Step j forward c times *)
-  let rec jump j c =
-    if c == 0 then j else jump (next j) (c - 1)
+  (* Step a tortoise and a hare until they meet *)
+  let rec meet i j =
+    let i2 = next i in
+    let j2 = next (next j) in
+    if i2 == j2 then i2 else meet i2 j2
   in
 
-  (* Find an index that is definitely on the loop starting from index n - 1 *)
-  let start = jump (n - 1) (n - 1) in
-
-  (* Step until we determine the cycle length *)
-  let length =
-    let rec fnc j acc =
-      if j == start then acc else fnc (next j) (acc + 1)
-    in fnc (next start) 1
+  (* Step both at the same speed until they meet.
+     Return the value they refer to *)
+  let rec duplicate i j =
+    let i2 = next i in
+    let j2 = next j in
+    if i2 == j2 then Array.get arr i else duplicate i2 j2
   in
-  Printf.printf "length: %d\n" length;
 
-  (* Find the first point before the cycle; this is the duplicate element *)
-  let j = jump (n - 1) (n - length) in
-  Array.get arr j
+  let start = n - 1 in
+  duplicate start (meet start start)
 
 let _ =
   Random.self_init();
 
-  let n = 10 in
   let arr = Array.of_list [6; 8; 0; 1; 0; 2; 4; 3; 7; 5;] in
+  let res = detect_duplicate arr in
+  assert (res == 0);
 
-(*  let arr = make_list n in*)
-
-
-  (* 6 8 0 0 0 2 4 5 7 5 *)
+  let n = 10 in
+  let arr = make_list n in
 
   Printf.printf "Input array: %s\n"
     (String.concat " " (List.map string_of_int (Array.to_list arr)));
