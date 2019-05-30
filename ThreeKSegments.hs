@@ -63,7 +63,7 @@ solvePoorly k xs =
   where n = length ys - 1
         ys = segmentSums k xs
         yvec = V.fromList ys
-        
+
 data TestInput = TestInput Int [Int] deriving Show
 
 instance Arbitrary TestInput where
