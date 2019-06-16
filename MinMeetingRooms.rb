@@ -19,7 +19,7 @@ def minMeetingRooms(times)
   starts, ends = times.transpose
   n = starts.length
   i, j = 0, 0
-  max = 0
+  maxRooms = 0
   while i < n do
     if starts[i] <= ends[j] then
       i += 1
@@ -27,14 +27,15 @@ def minMeetingRooms(times)
       j += 1
     end
     cnt = i - j
-    max = cnt if cnt > max
+    maxRooms = cnt if cnt > maxRooms
   end
   cnt = i - j
-  max = cnt if cnt > max
-  max
+  maxRooms = cnt if cnt > maxRooms
+  maxRooms
 end
 
 fail unless 0 == minMeetingRooms([])
 fail unless 1 == minMeetingRooms([[1, 2], [3, 4], [5, 6]])
+fail unless 2 == minMeetingRooms([[1, 2], [2, 3], [3, 4]])
 fail unless 3 == minMeetingRooms([[1, 5], [2, 4], [3, 3]])
 fail unless 3 == minMeetingRooms([[1, 3], [2, 4], [3, 5]])
