@@ -31,8 +31,11 @@ def minMeetingRooms(times)
   i, j = 0, 0
   maxRooms = 0
   while i < n do
-    if starts[i] <= ends[j] then
+    if starts[i] < ends[j] then
       i += 1
+    elsif starts[i] == ends[j] then
+      i += 1
+      j += 1
     else
       j += 1
     end
@@ -49,7 +52,7 @@ def minMeetingRoomsPQ(times)
   maxRooms = 0
   times.each do |t|
     s, e = t
-    while !q.empty? && s > q.top do
+    while !q.empty? && s >= q.top do
       q.pop
     end
     q.push(e, e)
@@ -59,13 +62,25 @@ def minMeetingRoomsPQ(times)
 end
 
 fail unless 0 == minMeetingRooms([])
+fail unless 1 == minMeetingRooms([[1, 2]])
+fail unless 1 == minMeetingRooms([[1, 2], [2, 3]])
+fail unless 1 == minMeetingRooms([[1, 2], [2, 3], [3, 4]])
 fail unless 1 == minMeetingRooms([[1, 2], [3, 4], [5, 6]])
-fail unless 2 == minMeetingRooms([[1, 2], [2, 3], [3, 4]])
+fail unless 1 == minMeetingRooms([[1, 2], [2, 3], [3, 4]])
+fail unless 2 == minMeetingRooms([[1, 2], [1, 2]])
+fail unless 2 == minMeetingRooms([[1, 3], [2, 4], [3, 5]])
+fail unless 3 == minMeetingRooms([[1, 2], [1, 2], [1, 2]])
 fail unless 3 == minMeetingRooms([[1, 5], [2, 4], [3, 3]])
-fail unless 3 == minMeetingRooms([[1, 3], [2, 4], [3, 5]])
 
 fail unless 0 == minMeetingRoomsPQ([])
+fail unless 1 == minMeetingRoomsPQ([[1, 2]])
+fail unless 1 == minMeetingRoomsPQ([[1, 2], [2, 3]])
+fail unless 1 == minMeetingRoomsPQ([[1, 2], [2, 3], [3, 4]])
 fail unless 1 == minMeetingRoomsPQ([[1, 2], [3, 4], [5, 6]])
-fail unless 2 == minMeetingRoomsPQ([[1, 2], [2, 3], [3, 4]])
+fail unless 1 == minMeetingRoomsPQ([[1, 2], [2, 3], [3, 4]])
+fail unless 2 == minMeetingRoomsPQ([[1, 2], [1, 2]])
+fail unless 2 == minMeetingRoomsPQ([[1, 3], [2, 4], [3, 5]])
+fail unless 3 == minMeetingRoomsPQ([[1, 2], [1, 2], [1, 2]])
 fail unless 3 == minMeetingRoomsPQ([[1, 5], [2, 4], [3, 3]])
-fail unless 3 == minMeetingRoomsPQ([[1, 3], [2, 4], [3, 5]])
+
+
