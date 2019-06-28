@@ -1,3 +1,24 @@
+=begin
+Given a string that consists of only 'R', 'G', and 'B' characters, and the only
+operation that you can do are to swap two characters, how do you order the
+string so that 'R' < 'G' < 'B' in linear time and constant space?
+
+e.g.
+"BGR" => "RGB"
+"RGBBGR" => "RRGGBB"
+
+The implementation here does this in place and in two phases. Each phase moves
+two indices through the string. The first phase looks for the leftmost 'R' and
+the leftmost non-'R', and then swaps them. The second phase picks up where the
+first phase ended. If looks for the leftmost 'G' and leftmost non-'G', and then
+swaps them. This is linear time and constant space.
+
+The correctness is verified by enumerating permutations of "RGB" strings and
+then comparing sorted strings against the expected sorted string generated
+naively by counting the number of 'R', 'G', and 'B' characters and then
+generating the sorted output.
+=end
+
 def sortRGB(xs)
   n = xs.length
   i, j = 0, 0
