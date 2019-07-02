@@ -6,6 +6,7 @@ import Control.Exception (assert)
 import Control.Monad
 import Data.Bits (Bits, (.&.), complement, xor)
 import Data.List (sort)
+import Test.HUnit hiding (assert)
 import Test.QuickCheck hiding ((.&.))
 
 data TestInput = TestInput [Int] deriving Show
@@ -42,5 +43,17 @@ testIt :: TestInput -> Bool
 testIt (TestInput xs) =
   uniq xs == uniqBySorting xs
 
+tests :: Test
+tests = TestList
+        [ (uniq [] :: Int) ~?= 0
+        , (uniq [1] :: Int) ~?= 1
+        , (uniq [1, 2, 1, 1] :: Int) ~?= 2
+        , (uniq [3, 2, 1, 2, 1, 2, 1] :: Int) ~?= 3
+        , (uniq [1, 2, 1, 2, 1, 2, 3] :: Int) ~?= 3
+        , (uniq [1, 1, 1, 2, 2, 2, 1] :: Int) ~?= 1
+        ]
+
 main :: IO ()
-main = quickCheckWith (stdArgs { maxSuccess = 10000 }) testIt
+main = do
+  runTestTT tests
+  quickCheckWith (stdArgs { maxSuccess = 1000, maxSize = 100 }) testIt
