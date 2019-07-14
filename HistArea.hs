@@ -13,8 +13,8 @@ j.
 
 The divide-and-conquer approach divides the list in two halves and recurses on
 each half.  Assume we know the largest rectangle on the left and right.  We then
-compute the largest largest rectangle that straddles the two halves.  We do this
-by iterating from the middle outwards.  At each iteration, we either append the
+compute the largest rectangle that straddles the two halves.  We do this by
+iterating from the middle outwards.  At each iteration, we either append the
 next cell to the left or right, whichever is taller, and then adjust the height
 of the rectangle appropriately.  Since there are O(logn) levels and each level
 requires O(n) operations, this gives O(nlogn) runtime.
