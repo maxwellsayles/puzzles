@@ -8,9 +8,9 @@ have a chain that represents the smallest subsection containing all
 the terms in order that ends at the current location in the text. We keep
 a running minimum of such chains.
 
-TODO: Use a (Map Ix Chain), where Ix is the index into th search terms,
-instead of a (Map String Chain) since when a word occurs more than once in the
-search terms, we don't handle this correctly.
+NOTE: This only works when the search terms are unique. Handling non-unique
+search terms would require that we key on the term position and that when a term
+is encountered, that we update all corresponding chains.
 
 This runs in O(n).
 -}
@@ -23,11 +23,19 @@ import Data.Ord
 import System.Environment
 
 import qualified Data.Map as M
+import qualified Data.Set as S
 
 type WordIx = (String, Int)
 
-data Chain = Chain { startIx :: Int,
-                     links   :: [WordIx] }
+data Chain = Chain
+  { startIx :: !Int
+  , links   :: [WordIx]
+  }
+
+data Solution = Solution
+  { bestChain :: Maybe Chain
+  , chains    :: M.Map String Chain
+  }
 
 -- O(n) length of chain links
 lengthLinks :: [WordIx] -> Int
@@ -47,9 +55,6 @@ singletonChain (word, index) = Chain index [(word, index)]
 consChain :: WordIx -> Chain -> Chain
 consChain wix (Chain s c) = Chain s (wix:c)
                      
-data Solution = Solution { bestChain :: Maybe Chain,
-                           chains    :: M.Map String Chain }
-
 lookupChain :: String -> Solution -> Maybe Chain
 lookupChain w (Solution _ chains) = M.lookup w chains
 
@@ -64,45 +69,45 @@ updateSolution :: Maybe Chain -> Solution -> Solution
 updateSolution Nothing s = s
 updateSolution c (Solution Nothing chains) = Solution c chains
 updateSolution c@(Just candidate) s@(Solution (Just best) chains) =
-    let bl = lengthChain best
-        cl = lengthChain candidate
-    in  if bl <= cl then s else Solution c chains
-
+  if lengthChain best <= lengthChain candidate then s else Solution c chains
+  
 search :: [String] -> [WordIx] -> Maybe [WordIx]
 search searchWords textIndex =
-    reverse . links <$>
-    (bestChain $ foldl' helper emptySolution textIndex)
-    where lastWord  = last searchWords
-          firstWord = head searchWords
-          prevWords = M.fromList $ zip (tail searchWords) searchWords
+  reverse . links <$>
+  (bestChain $ foldl' helper emptySolution textIndex)
+  where
+    lastWord  = last searchWords
+    firstWord = head searchWords
+    prevWords = M.fromList $ zip (tail searchWords) searchWords
 
-          helper :: Solution -> WordIx -> Solution
-          helper acc wix@(word, index)
-              | word == firstWord =
-                  insertChain word (singletonChain wix) acc
-              | word == lastWord  = 
-                  updateSolution (lookupChain word res) res
-              | otherwise = res
-              where res = fromMaybe acc $ do
-                            p <- M.lookup word prevWords
-                            c <- lookupChain p acc
-                            return $! insertChain word (consChain wix c) acc
+    helper :: Solution -> WordIx -> Solution
+    helper acc wix@(word, index)
+      | word == firstWord =
+          insertChain word (singletonChain wix) acc
+      | word == lastWord  = 
+          updateSolution (lookupChain word res) res
+      | otherwise = res
+      where
+        res = fromMaybe acc $ do
+          p <- M.lookup word prevWords
+          c <- lookupChain p acc
+          return $! insertChain word (consChain wix c) acc
 
 searchStart :: [String] -> [WordIx] -> [WordIx] -> Maybe [WordIx]
 searchStart [] _ acc = Just $ reverse acc
 searchStart _ [] _   = Nothing
 searchStart wss@(w:ws) (tix@(t,_):ts) acc
-    | t == w    = searchStart ws ts (tix:acc)
-    | otherwise = searchStart wss ts acc
+  | t == w    = searchStart ws ts (tix:acc)
+  | otherwise = searchStart wss ts acc
 
 slowSearch :: [String] -> [WordIx] -> [[WordIx]] -> Maybe [WordIx]
 slowSearch _ [] [] = Nothing
 slowSearch _ [] acc = Just $ minimumBy (comparing lengthLinks) acc
 slowSearch ws ts acc = 
-    let s = searchStart ws ts []
-    in  case s of
-          Nothing -> slowSearch [] [] acc
-          Just l  -> slowSearch ws (tail $ dropWhile (/= head l) ts) (l:acc)
+  let s = searchStart ws ts []
+  in  case s of
+        Nothing -> slowSearch [] [] acc
+        Just l  -> slowSearch ws (tail $ dropWhile (/= head l) ts) (l:acc)
 
 runIt :: FilePath -> [String] -> IO ()
 runIt sourceFilePath searchWords = do
@@ -119,10 +124,15 @@ usage :: IO ()
 usage = do
   progName <- getProgName
   putStrLn $ "Usage: " ++ progName ++ " <canon.txt> <term1> [<term2> <term3> ...]"
+  putStrLn "Terms must be unique."
 
 main :: IO ()
 main = do
   args <- getArgs
   if length args < 2
     then usage
-    else runIt (head args) (tail args)
+    else let (sourceFilePath:searchWords) = args
+             uniqSearchWords = S.fromList searchWords
+         in if S.size uniqSearchWords /= length searchWords
+            then usage
+            else runIt (head args) (tail args)
