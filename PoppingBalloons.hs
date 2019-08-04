@@ -1,7 +1,8 @@
 import Data.List (inits, tails)
-import Data.Array.IArray (Array, (!), listArray)
-import Test.HUnit
+import Test.HUnit (Test, Test(TestList), (~?=), runTestTT)
 
+{-| Intentionally slow, reference implementation. This tries all permutations 
+and then takes the maximum. |-}
 solvePermute :: (Ord a, Num a) => [a] -> a
 solvePermute [] = 0
 solvePermute xs =
