@@ -1,3 +1,11 @@
+{-| Suppose you have N balloons in a row. Each balloon has a value. When you 
+pop balloon k, you get the value of ballon k-1 * balloon k * balloon k + 1.
+What's the most you can earn?
+
+We presentn two solutions, one that iterates over all permutations of baloon
+popping and takes O(N!), and the other that is O(N^3) DP.
+|-}
+
 import Control.Monad (liftM, replicateM)
 import Data.Array.IArray (Array, array, listArray, (!))
 import Data.List (inits, tails)
