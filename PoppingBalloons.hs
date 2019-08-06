@@ -1,6 +1,8 @@
+import Control.Monad (liftM, replicateM)
 import Data.Array.IArray (Array, array, listArray, (!))
 import Data.List (inits, tails)
 import Test.HUnit (Test, Test(TestList), (~?=), runTestTT)
+import Test.QuickCheck
 
 {-| For balloon k, when it pops, what's the most we can earn? Depends what it's
 next to. Just compute all possibilities, for n balloons, they can be next to n
@@ -62,8 +64,20 @@ testFn f = TestList
   , f [-1, -2, -3] ~?= 7
   ]
 
+data TestInput = TestInput [Int] deriving Show
+
+instance Arbitrary TestInput where
+  arbitrary = liftM TestInput $
+              sized $ \n -> replicateM n (choose (-n, n))
+
+testSame :: TestInput -> Bool
+testSame (TestInput xs) =
+  let a = solve xs
+      b = solvePermute xs
+  in a == b
+
 main :: IO ()
 main = do
   _ <- runTestTT (testFn solve)
   _ <- runTestTT (testFn solvePermute)
-  return ()
+  quickCheckWith stdArgs { maxSize = 11, maxSuccess = 100 } testSame
