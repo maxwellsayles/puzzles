@@ -60,9 +60,9 @@ data TestCase =
 
 instance Arbitrary TestCase where
   arbitrary = do
-    xs <- liftM (filter (/= 0)) $ arbitrary
-    y <- suchThat arbitrary (\y -> y /= 0)
-    z <- suchThat arbitrary (\z -> z /= 0 && z /= y)
+    xs <- arbitrary
+    y <- arbitrary
+    z <- suchThat arbitrary (\z -> z /= y)
     xs' <- shuffle (xs ++ xs ++ [y, z])
     let v = if y < z then (y, z) else (z, y)
     return $! TestCase xs' v
