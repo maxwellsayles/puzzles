@@ -15,20 +15,14 @@ This is O(n) time and O(1) space.
 import Control.Arrow ((***), (>>>))
 import Control.Exception (assert)
 import Control.Monad (liftM)
-import Data.Bits ((.&.), shiftR, testBit, xor)
+import Data.Bits (testBit, xor)
 import Data.List (foldl', partition)
 import Test.HUnit (Test( TestList ), runTestTT, (~?=))
-import Test.QuickCheck hiding ((.&.))
+import Test.QuickCheck
 
 lsb :: Int -> Int
 lsb 0 = assert False 0
-lsb x = loop x 0
-  where
-    loop x !acc =
-      if x .&. 1 == 1 then
-        acc
-      else
-        loop (x `shiftR` 1) (acc + 1)
+lsb x = length $ takeWhile not $ map (testBit x) [0..]
 
 xorList :: [Int] -> Int
 xorList = foldl' xor 0
@@ -58,14 +52,13 @@ instance Arbitrary TestCase where
   arbitrary = do
     xs <- arbitrary
     y <- arbitrary
-    z <- suchThat arbitrary (\z -> z /= y)
+    z <- suchThat arbitrary (/= y)
     xs' <- shuffle (xs ++ xs ++ [y, z])
     let v = if y < z then (y, z) else (z, y)
     return $! TestCase xs' v
 
 verify :: TestCase -> Bool
-verify (TestCase xs v) =
-  solve xs == v
+verify (TestCase xs v) = solve xs == v
 
 main :: IO ()
 main = do
