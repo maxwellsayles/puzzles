@@ -12,10 +12,11 @@ based on elements where the bit is set/clear and use the xor trick.
 This is O(n) time and O(1) space.
 -}
 
+import Control.Arrow ((***), (>>>))
 import Control.Exception (assert)
 import Control.Monad (liftM)
-import Data.Bits
-import Data.List (foldl')
+import Data.Bits ((.&.), shiftR, testBit, xor)
+import Data.List (foldl', partition)
 import Test.HUnit (Test( TestList ), runTestTT, (~?=))
 import Test.QuickCheck hiding ((.&.))
 
@@ -33,14 +34,11 @@ xorList :: [Int] -> Int
 xorList = foldl' xor 0
 
 solve :: [Int] -> (Int, Int)
-solve xs = loop xs 0 0
+solve xs = if y < z then (y, z) else (z, y)
   where
-    m = 1 `shiftL` (lsb $ xorList xs)
-    loop [] !y !z =
-      if y < z then (y, z) else (z, y)
-    loop (x:xs) !y !z
-      | x .&. m /= 0 = loop xs (x `xor` y) z
-      | otherwise = loop xs y (x `xor` z)
+    b = lsb $ xorList xs
+    (y, z) = (xorList *** xorList) $
+             partition (flip testBit b) xs
 
 tests :: Test
 tests = TestList
