@@ -29,13 +29,13 @@ lsb x = loop x 0
       else
         loop (x `shiftR` 1) (acc + 1)
 
-mask :: [Int] -> Int
-mask = foldl' xor 0
+xorList :: [Int] -> Int
+xorList = foldl' xor 0
 
 solve :: [Int] -> (Int, Int)
 solve xs = loop xs 0 0
   where
-    m = 1 `shiftL` (lsb $ mask xs)
+    m = 1 `shiftL` (lsb $ xorList xs)
     loop [] !y !z =
       if y < z then (y, z) else (z, y)
     loop (x:xs) !y !z
