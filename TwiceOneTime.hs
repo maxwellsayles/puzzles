@@ -15,6 +15,7 @@ This is O(n) time and O(1) space.
 import Control.Exception (assert)
 import Control.Monad (liftM)
 import Data.Bits
+import Data.List (foldl')
 import Test.HUnit (Test( TestList ), runTestTT, (~?=))
 import Test.QuickCheck hiding ((.&.))
 
@@ -29,10 +30,7 @@ lsb x = loop x 0
         loop (x `shiftR` 1) (acc + 1)
 
 mask :: [Int] -> Int
-mask xs = loop xs 0
-  where
-    loop [] !acc = acc
-    loop (x:xs) !acc = loop xs (acc `xor` x)
+mask = foldl' xor 0
 
 solve :: [Int] -> (Int, Int)
 solve xs = loop xs 0 0
