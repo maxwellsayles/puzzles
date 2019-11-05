@@ -22,7 +22,7 @@ import Test.QuickCheck
 
 lsb :: Int -> Int
 lsb 0 = assert False 0
-lsb x = length $ takeWhile not $ map (testBit x) [0..]
+lsb x = length $ takeWhile (not . testBit x) [0..]
 
 xorList :: [Int] -> Int
 xorList = foldl' xor 0
