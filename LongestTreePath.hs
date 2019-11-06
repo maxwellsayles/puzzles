@@ -1,4 +1,4 @@
-{-|
+{-
 Given a binary tree, find the longest path between two nodes.
 
 We solve this by computing the height of a tree.  Given the height
@@ -17,10 +17,10 @@ import System.Random
 
 data Tree a = Empty | Node a (Tree a) (Tree a)
 
-{-|
+{-
 Generate a random binary search tree that includes each of the
 elements in the range [low, high] inclusive.
- -}
+-}
 randomTree low high
     | low > high  = return Empty
     | low == high = return $! Node low Empty Empty
@@ -29,7 +29,7 @@ randomTree low high
                        right <- randomTree (mid+1) high
                        return $! Node mid left right
 
-{-| Returns (height, longestPathSoFar) -}
+{- Returns (height, longestPathSoFar) -}
 longestPath Empty = (0, 0)
 longestPath (Node _ l r) =
     let (lh, lx) = longestPath l
