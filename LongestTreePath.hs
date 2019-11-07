@@ -47,7 +47,3 @@ longestPath (Node _ l r) =
     let (lh, lx) = longestPath l
         (rh, rx) = longestPath r
     in  (1 + max lh rh, maximum [lx, rx, lh + rh + 2])
-
-main :: IO ()
-main = do
-  return ()
