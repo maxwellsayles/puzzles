@@ -18,18 +18,13 @@
 %% 14. THE NORWEGIAN LIVES NEXT TO THE HOUSE WITH BLUE WALLS.
 %% 15. THE MAN WHO SMOKES BLENDS HAS A NEXT-DOOR NEIGHBOR WHO DRINKS WATER.
 
-%% The solution here contains a few optimizations:
-%% - From clue 8, we only consider permutations of drinks where milk is in the
-%%   center location.
-%% - From clue 9, we only consider permutations of nations where the norwegian
-%%   is first.
-%% - From clue 14, we only consider permutations of walls where the blue house
-%%   is second.
-%% - `solution_` is a more literal translation of clues into statements.
-%% - `solution` is a restructuring of these statements in order to reduce the
-%%   search space. For example, if the permuation of wall colors cannot lead to
-%%   a valid solution, there is no need to consider the permuations of any other
-%%   sets.
+%% `solution_` is a fairly literal translation of the clues into statements and
+%% likely considers (5!)^5 = 24883200000 combinations.
+
+%% `solution` is a restructuring of these statements in order to reduce the
+%% search space. For example, if the permutation of wall colors cannot lead to
+%% a valid solution, there is no need to consider the permutations of any other
+%% sets.
 
 walls(red).
 walls(green).
@@ -62,20 +57,20 @@ smokes(blue_master).
 smokes(prince).
 
 wall_perms(Ws) :-
-    permutation([green, red, white, yellow], [X | Xs]),
-    Ws = [X | [blue | Xs]].
+    findall(W, walls(W), T),
+    permutation(T, Ws).
 
 nation_perms(Ns) :-
-    permutation([brit, dane, german, swede], Xs),
-    Ns = [norwegian | Xs].
+    findall(N, nation(N), T),
+    permutation(T, Ns).
 
 pet_perms(Ps) :-
     findall(P, pet(P), T),
     permutation(T, Ps).
 
 drink_perms(Ds) :-
-    permutation([coffee, root_beer, tea, water], [X, Y, Z, W]),
-    Ds = [X, Y, milk, Z, W].
+    findall(D, drinks(D), T),
+    permutation(T, Ds).
 
 smoke_perms(Ss) :-
     findall(S, smokes(S), T),
@@ -87,18 +82,16 @@ next_to(X, Y) :- left_of(X, Y);
 		 right_of(X, Y).
 
 solution(Walls, Nations, Pets, Drinks, Smokes) :-
-    R9 is 0, % norwegian is first
-
     wall_perms(Walls),
+    R14b is 1, % blue is second
+    nth0(R14b, Walls, blue),
     nth0(R4a, Walls, green),
     nth0(R4b, Walls, white),
     left_of(R4a, R4b),
-    R14a = R9,
-    nth0(R14b, Walls, blue),
-    next_to(R14a, R14b),
 
     pet_perms(Pets),
     nth0(R11a, Pets, horse),
+    nth0(R7, Walls, yellow),
     R11b = R7,
     next_to(R11a, R11b),
 
@@ -108,10 +101,11 @@ solution(Walls, Nations, Pets, Drinks, Smokes) :-
     next_to(R10a, R10b),
     nth0(R6, Pets, bird),
     nth0(R6, Smokes, pall_mall),
-    nth0(R7, Walls, yellow),
     nth0(R7, Smokes, dunhill),
 
     drink_perms(Drinks),
+    R8 is 2, % milk is third (center)
+    nth0(R8, Drinks, milk),
     R15a = R10a,
     nth0(R15b, Drinks, water),
     next_to(R15a, R15b),
@@ -121,6 +115,8 @@ solution(Walls, Nations, Pets, Drinks, Smokes) :-
     nth0(R12, Drinks, root_beer),
 
     nation_perms(Nations),
+    R9 is 0, % norwegian is first
+    nth0(R9, Nations, norwegian),
     nth0(R1, Walls, red),
     nth0(R1, Nations, brit),
     nth0(R2, Pets, dog),
