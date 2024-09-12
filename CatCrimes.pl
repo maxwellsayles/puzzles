@@ -1,126 +1,64 @@
 %% Solver for the logic game "Cat Crimes".
 
-:- discontiguous across_from/2.
-:- discontiguous left_of/2.
-:- discontiguous in_front_of/2.
-:- discontiguous minutiae/2.
-:- discontiguous next_to/2.
+take(0, _, []).
+take(_, [], []).
+take(N, [X|Xs], [X|Ys]) :- M is N-1, take(M, Xs, Ys).
 
-cat(duchess).
-cat(ginger).
-cat(mr_mittens).
-cat(pip_squeak).
-cat(sassy).
-cat(tom_cat).
+places(Places) :-
+    Places = [birdcage, coffee_cup, shoes, fish_bowl, yarn, plant].
 
-place(birdcage).
-place(coffee_cup).
-place(fish_bowl).
-place(plant).
-place(shoes).
-place(yarn).
+cat_perms(SleepingCats, Cats) :-
+    InitCats = [duchess, ginger, mr_mittens, pip_squeak, sassy, tom_cat],
+    subtract(InitCats, SleepingCats, PresentCats),
+    append(PresentCats, [none_cat, none_cat, none_cat, none_cat, none_cat, none_cat], NoneCats),
+    take(6, NoneCats, SixCats),
+    permutation(SixCats, Cats).
 
-minutiae(birdcage, [claw_marks, mouse]).
-minutiae(coffee_cup, [bell_ball, paw_print]).
-minutiae(shoes, [catnip, claw_marks]).
-minutiae(fish_bowl, [bell_ball, sock]).
-minutiae(yarn, [mouse, paw_print]).
-minutiae(plant, [catnip, sock]).
+minutia(catnip, 2).
+minutia(catnip, 5).
+minutia(sock, 3).
+minutia(sock, 5).
 
-across_from(birdcage, fish_bowl).
-across_from(coffee_cup, plant).
-across_from(shoes, yarn).
-across_from(fish_bowl, birdcage).
-across_from(yarn, shoes).
-across_from(plant, coffee_cup).
+across_from(0, 3).
+across_from(1, 5).
+across_from(2, 4).
+across_from(3, 0).
+across_from(4, 2).
+across_from(5, 1).
 
-left_of(coffee_cup, birdcage).
-left_of(shoes, coffee_cup).
-left_of(fish_bowl, shoes).
-left_of(yarn, fish_bowl).
-left_of(plant, yarn).
-left_of(birdcage, plant).
+left_of(0, 5).
+left_of(X, Y) :- Y is X - 1, Y >= 0, Y =< 5.
 
-right_of(A, B) :-
-    place(A),
-    place(B),
-    left_of(B, A).
+right_of(5, 0).
+right_of(X, Y) :- Y is X + 1, Y >= 0, Y =< 5.
 
-next_to(A, B) :-
-    place(A),
-    place(B),
-    (left_of(A, B); right_of(A, B)).
-
-%% "In front of" when "across from"
-in_front_of(X, A) :-
-    cat(X),
-    cat(Y),
-    place(A),
-    place(B),
-    across_from(X, Y),
-    in_front_of(Y, B),
-    across_from(A, B).
-
-%% "In front of" when "left of"
-in_front_of(X, A) :-
-    cat(X),
-    cat(Y),
-    place(A),
-    place(B),
-    left_of(X, Y),
-    in_front_of(Y, B),
-    left_of(A, B).
-
-%% "In front of" when "next to"
-in_front_of(X, A) :-
-    cat(X),
-    place(A),
-    place(B),
-    next_to(X, B),
-    next_to(A, B).
-
-%% "In front of" given a minutiae.
-in_front_of(X, A) :-
-    cat(X),
-    place(A),
-    minutiae(A, MinA),
-    minutiae(X, MinX),
-    subset(MinX, MinA).
+next_to(X, Y) :- left_of(X, Y).
+next_to(X, Y) :- right_of(X, Y).
 
 pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
 
-% List of all participating cats.
-solution(Res) :-
-    findall(X, cat(X), Xs),
-    exclude(sleeping, Xs, Cats),
-    maplist(in_front_of, Cats, Places),
-    sort(Places, SortedPlaces),
-    length(Cats, LengthCats),
-    length(SortedPlaces, LengthPlaces),
-    LengthCats == LengthPlaces,
+solution1(Cats) :-
+    cat_perms([mr_mittens, pip_squeak], Cats),
+    places(Places),
+
+    nth0(TomCat, Cats, tom_cat),
+    minutia(catnip, TomCat),
+    minutia(sock, TomCat),
+
+    nth0(Sassy, Cats, sassy),
+    across_from(Sassy, TomCat),
+
+    nth0(Ginger, Cats, ginger),
+    nth0(FishBowl, Places, fish_bowl),
+    next_to(Ginger, FishBowl),
+
+    nth0(Duchess, Cats, duchess),
+    left_of(Duchess, Sassy),
+
+    !.
+
+pretty(Res) :-
+    solution1(Cats),
+    places(Places),
     maplist(pretty_print, Cats, Places, Res).
-
-%% Example of expressing card #1
-sleeping(mr_mittens).
-sleeping(pip_squeak).
-minutiae(tom_cat, [catnip, sock]).
-across_from(sassy, tom_cat).
-next_to(ginger, fish_bowl).
-left_of(duchess, sassy).
-
-
-%% bow(duchess).
-%% bow(tom_cat).
-
-%% stripes(ginger).
-%% stripes(pip_squeak).
-
-%% long_haired(...)
-
-%% eyes(blue, ginger).
-%% eyes(blue, tom_cat).
-%% eyes(green, sassy).
-%% eyes(green, pip_squeak).
-%% eyes(yellow, duchess).
-%% eyes(yellow, mr_mittens).
