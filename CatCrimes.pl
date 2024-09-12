@@ -49,6 +49,27 @@ some_cat(X, Cats) :-
     nth0(X, Cats, Cat),
     Cat \= none_cat.
 
+cat_across_from_cat(A, B, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    across_from(X, Y).
+
+cat_next_to_cat(A, B, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    next_to(X, Y).
+
+cat_next_to_place(A, P, Cats) :-
+    places(Places),
+    nth0(X, Cats, A),
+    nth0(Y, Places, P),
+    next_to(X, Y).
+
+cat_right_of_cat(A, B, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    right_of(X, Y).
+
 pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
 
@@ -113,6 +134,14 @@ solution3(Cats) :-
     minutia(PipSqueak, bellball),
     minutia(PipSqueak, pawprint),
 
+    !.
+
+solution4(Cats) :-
+    cat_perms([duchess, pipsqueak, tomcat], Cats),
+    cat_across_from_cat(ginger, sassy, Cats),
+    cat_next_to_cat(sassy, mrmittens, Cats),
+    cat_next_to_place(ginger, birdcage, Cats),
+    cat_right_of_cat(ginger, mrmittens, Cats),
     !.
 
 pretty(Res) :-
