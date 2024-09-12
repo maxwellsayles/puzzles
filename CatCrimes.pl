@@ -84,6 +84,11 @@ cat_next_to_place(A, P, Cats) :-
     nth0(Y, Places, P),
     next_to(X, Y).
 
+cat_next_to_some_cat(C, Cats) :-
+    nth0(X, Cats, C),
+    next_to(Y, X),
+    some_cat(Y, Cats).
+
 pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
 
@@ -108,9 +113,7 @@ solution2(Cats) :-
 
 solution3(Cats) :-
     cat_perms([duchess, sassy, tomcat], Cats),
-    nth0(Ginger, Cats, ginger),
-    next_to(N, Ginger),
-    some_cat(N, Cats),
+    cat_next_to_some_cat(ginger, Cats),
     \+ cat_next_to_place(ginger, fishbowl, Cats),
     cat_in_front_of_place(mrmittens, fishbowl, Cats),
     cat_in_front_of_minutia(pipsqueak, bellball, Cats),
