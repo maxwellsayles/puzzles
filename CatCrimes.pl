@@ -54,11 +54,11 @@ some_cat(X, Cats) :-
     nth0(X, Cats, Cat),
     Cat \= none_cat.
 
-cat_in_front_of_minutia(C, M, Cats) :-
+cat_by_minutia(C, M, Cats) :-
     nth0(X, Cats, C),
     minutia(X, M).
 
-cat_in_front_of_place(C, P, Cats) :-
+cat_by_place(C, P, Cats) :-
     places(Places),
     nth0(X, Cats, C),
     nth0(X, Places, P).
@@ -94,13 +94,18 @@ cat_next_to_some_cat(C, Cats) :-
     next_to(Y, X),
     some_cat(Y, Cats).
 
+trait_by_minutia(T, M, Cats) :-
+    trait(T, C),
+    nth0(X, Cats, C),
+    minutia(X, M).
+
 pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
 
 solution1(Cats) :-
     cat_perms([mrmittens, pipsqueak], Cats),
-    cat_in_front_of_minutia(tomcat, catnip, Cats),
-    cat_in_front_of_minutia(tomcat, sock, Cats),
+    cat_by_minutia(tomcat, catnip, Cats),
+    cat_by_minutia(tomcat, sock, Cats),
     cat_across_from_cat(sassy, tomcat, Cats),
     cat_next_to_place(ginger, fishbowl, Cats),
     cat_left_of_cat(duchess, sassy, Cats),
@@ -108,9 +113,9 @@ solution1(Cats) :-
 
 solution2(Cats) :-
     cat_perms([], Cats),
-    cat_in_front_of_place(mrmittens, birdcage, Cats),
+    cat_by_place(mrmittens, birdcage, Cats),
     cat_across_from_cat(tomcat, mrmittens, Cats),
-    cat_in_front_of_minutia(pipsqueak, mouse, Cats),
+    cat_by_minutia(pipsqueak, mouse, Cats),
     cat_next_to_cat(duchess, pipsqueak, Cats),
     cat_next_to_cat(sassy, ginger, Cats),
     \+ cat_across_from_cat(ginger, duchess, Cats),
@@ -120,9 +125,9 @@ solution3(Cats) :-
     cat_perms([duchess, sassy, tomcat], Cats),
     cat_next_to_some_cat(ginger, Cats),
     \+ cat_next_to_place(ginger, fishbowl, Cats),
-    cat_in_front_of_place(mrmittens, fishbowl, Cats),
-    cat_in_front_of_minutia(pipsqueak, bellball, Cats),
-    cat_in_front_of_minutia(pipsqueak, pawprint, Cats),
+    cat_by_place(mrmittens, fishbowl, Cats),
+    cat_by_minutia(pipsqueak, bellball, Cats),
+    cat_by_minutia(pipsqueak, pawprint, Cats),
     !.
 
 solution4(Cats) :-
@@ -139,12 +144,8 @@ solution5(Cats) :-
     ([none_cat, _, none_cat, _, none_cat, _] = Cats;
      [_, none_cat, _, none_cat, _, none_cat] = Cats),
 
-    % cat with white paws near a paw print
-    trait(whitepaws, WhitePaws),
-    nth0(R3, Cats, WhitePaws),
-    minutia(R3, pawprint),
-
-    cat_in_front_of_minutia(pipsqueak, clawmarks, Cats),
+    trait_by_minutia(whitepaws, pawprint, Cats),
+    cat_by_minutia(pipsqueak, clawmarks, Cats),
     cat_across_from_cat(ginger, none_cat, Cats),
     !.
 
