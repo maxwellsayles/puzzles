@@ -8,10 +8,10 @@ replicate(N, X, Ys) :-
     !.
 
 places(Places) :-
-    Places = [birdcage, coffee_cup, shoes, fish_bowl, yarn, plant].
+    Places = [birdcage, coffeecup, shoes, fishbowl, yarn, plant].
 
 cat_perms(SleepingCats, Cats) :-
-    InitCats = [duchess, ginger, mr_mittens, pip_squeak, sassy, tom_cat],
+    InitCats = [duchess, ginger, mrmittens, pipsqueak, sassy, tomcat],
     subtract(InitCats, SleepingCats, PresentCats),
     length(SleepingCats, Cnt),
     replicate(Cnt, none_cat, NoneCats),
@@ -45,10 +45,10 @@ pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
 
 solution1(Cats) :-
-    cat_perms([mr_mittens, pip_squeak], Cats),
+    cat_perms([mrmittens, pipsqueak], Cats),
     places(Places),
 
-    nth0(TomCat, Cats, tom_cat),
+    nth0(TomCat, Cats, tomcat),
     minutia(TomCat, catnip),
     minutia(TomCat, sock),
 
@@ -56,7 +56,7 @@ solution1(Cats) :-
     across_from(Sassy, TomCat),
 
     nth0(Ginger, Cats, ginger),
-    nth0(FishBowl, Places, fish_bowl),
+    nth0(FishBowl, Places, fishbowl),
     next_to(Ginger, FishBowl),
 
     nth0(Duchess, Cats, duchess),
@@ -68,13 +68,13 @@ solution2(Cats) :-
     cat_perms([], Cats),
     places(Places),
 
-    nth0(MrMittens, Cats, mr_mittens),
+    nth0(MrMittens, Cats, mrmittens),
     nth0(MrMittens, Places, birdcage),
 
-    nth0(TomCat, Cats, tom_cat),
+    nth0(TomCat, Cats, tomcat),
     across_from(MrMittens, TomCat),
 
-    nth0(PipSqueak, Cats, pip_squeak),
+    nth0(PipSqueak, Cats, pipsqueak),
     minutia(PipSqueak, mouse),
 
     nth0(Duchess, Cats, duchess),
