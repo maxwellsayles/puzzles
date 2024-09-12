@@ -22,12 +22,17 @@ minutia(1, bellball).
 minutia(3, bellball).
 minutia(2, catnip).
 minutia(5, catnip).
+minutia(0, clawmarks).
+minutia(2, clawmarks).
 minutia(0, mouse).
 minutia(4, mouse).
 minutia(1, pawprint).
 minutia(4, pawprint).
 minutia(3, sock).
 minutia(5, sock).
+
+trait(whitepaws, sassy).
+trait(whitepaws, mrmittens).
 
 across_from(0, 3).
 across_from(1, 5).
@@ -126,6 +131,21 @@ solution4(Cats) :-
     cat_next_to_cat(sassy, mrmittens, Cats),
     cat_next_to_place(ginger, birdcage, Cats),
     cat_right_of_cat(ginger, mrmittens, Cats),
+    !.
+
+solution5(Cats) :-
+    cat_perms([tomcat, sassy, duchess], Cats),
+    % no cat is sitting next to another
+    ([none_cat, _, none_cat, _, none_cat, _] = Cats;
+     [_, none_cat, _, none_cat, _, none_cat] = Cats),
+
+    % cat with white paws near a paw print
+    trait(whitepaws, WhitePaws),
+    nth0(R3, Cats, WhitePaws),
+    minutia(R3, pawprint),
+
+    cat_in_front_of_minutia(pipsqueak, clawmarks, Cats),
+    cat_across_from_cat(ginger, none_cat, Cats),
     !.
 
 pretty(Res) :-
