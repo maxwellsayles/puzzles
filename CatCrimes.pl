@@ -1,8 +1,11 @@
 %% Solver for the logic game "Cat Crimes".
 
-take(0, _, []).
-take(_, [], []).
-take(N, [X|Xs], [X|Ys]) :- M is N-1, take(M, Xs, Ys).
+replicate(0, _, Ys) :- Ys = [], !.
+replicate(N, X, Ys) :-
+    M is N - 1,
+    replicate(M, X, Zs),
+    Ys = [X | Zs],
+    !.
 
 places(Places) :-
     Places = [birdcage, coffee_cup, shoes, fish_bowl, yarn, plant].
@@ -10,14 +13,17 @@ places(Places) :-
 cat_perms(SleepingCats, Cats) :-
     InitCats = [duchess, ginger, mr_mittens, pip_squeak, sassy, tom_cat],
     subtract(InitCats, SleepingCats, PresentCats),
-    append(PresentCats, [none_cat, none_cat, none_cat, none_cat, none_cat, none_cat], NoneCats),
-    take(6, NoneCats, SixCats),
+    length(SleepingCats, Cnt),
+    replicate(Cnt, none_cat, NoneCats),
+    append(PresentCats, NoneCats, SixCats),
     permutation(SixCats, Cats).
 
-minutia(catnip, 2).
-minutia(catnip, 5).
-minutia(sock, 3).
-minutia(sock, 5).
+minutia(2, catnip).
+minutia(5, catnip).
+minutia(0, mouse).
+minutia(4, mouse).
+minutia(3, sock).
+minutia(5, sock).
 
 across_from(0, 3).
 across_from(1, 5).
@@ -43,8 +49,8 @@ solution1(Cats) :-
     places(Places),
 
     nth0(TomCat, Cats, tom_cat),
-    minutia(catnip, TomCat),
-    minutia(sock, TomCat),
+    minutia(TomCat, catnip),
+    minutia(TomCat, sock),
 
     nth0(Sassy, Cats, sassy),
     across_from(Sassy, TomCat),
@@ -55,6 +61,30 @@ solution1(Cats) :-
 
     nth0(Duchess, Cats, duchess),
     left_of(Duchess, Sassy),
+
+    !.
+
+solution2(Cats) :-
+    cat_perms([], Cats),
+    places(Places),
+
+    nth0(MrMittens, Cats, mr_mittens),
+    nth0(MrMittens, Places, birdcage),
+
+    nth0(TomCat, Cats, tom_cat),
+    across_from(MrMittens, TomCat),
+
+    nth0(PipSqueak, Cats, pip_squeak),
+    minutia(PipSqueak, mouse),
+
+    nth0(Duchess, Cats, duchess),
+    next_to(Duchess, PipSqueak),
+
+    nth0(Sassy, Cats, sassy),
+    nth0(Ginger, Cats, ginger),
+    next_to(Sassy, Ginger),
+
+    \+ across_from(Ginger, Duchess),
 
     !.
 
