@@ -18,10 +18,14 @@ cat_perms(SleepingCats, Cats) :-
     append(PresentCats, NoneCats, SixCats),
     permutation(SixCats, Cats).
 
+minutia(1, bellball).
+minutia(3, bellball).
 minutia(2, catnip).
 minutia(5, catnip).
 minutia(0, mouse).
 minutia(4, mouse).
+minutia(1, pawprint).
+minutia(4, pawprint).
 minutia(3, sock).
 minutia(5, sock).
 
@@ -33,13 +37,17 @@ across_from(4, 2).
 across_from(5, 1).
 
 left_of(0, 5).
-left_of(X, Y) :- Y is X - 1, Y >= 0, Y =< 5.
+left_of(X, Y) :- between(0, 5, X), between(0, 5, Y), Y is X - 1.
 
 right_of(5, 0).
-right_of(X, Y) :- Y is X + 1, Y >= 0, Y =< 5.
+right_of(X, Y) :- between(0, 5, X), between(0, 5, Y), Y is X + 1.
 
 next_to(X, Y) :- left_of(X, Y).
 next_to(X, Y) :- right_of(X, Y).
+
+some_cat(X, Cats) :-
+    nth0(X, Cats, Cat),
+    Cat \= none_cat.
 
 pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
@@ -85,6 +93,25 @@ solution2(Cats) :-
     next_to(Sassy, Ginger),
 
     \+ across_from(Ginger, Duchess),
+
+    !.
+
+solution3(Cats) :-
+    cat_perms([duchess, sassy, tomcat], Cats),
+    places(Places),
+
+    nth0(Ginger, Cats, ginger),
+    next_to(N, Ginger),
+    some_cat(N, Cats),
+    nth0(FishBowl, Places, fishbowl),
+    \+ next_to(Ginger, FishBowl),
+
+    nth0(MrMittens, Cats, mrmittens),
+    MrMittens = FishBowl,
+
+    nth0(PipSqueak, Cats, pipsqueak),
+    minutia(PipSqueak, bellball),
+    minutia(PipSqueak, pawprint),
 
     !.
 
