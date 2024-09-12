@@ -49,10 +49,29 @@ some_cat(X, Cats) :-
     nth0(X, Cats, Cat),
     Cat \= none_cat.
 
+cat_in_front_of_minutia(C, M, Cats) :-
+    nth0(X, Cats, C),
+    minutia(X, M).
+
+cat_in_front_of_place(C, P, Cats) :-
+    places(Places),
+    nth0(X, Cats, C),
+    nth0(X, Places, P).
+
 cat_across_from_cat(A, B, Cats) :-
     nth0(X, Cats, A),
     nth0(Y, Cats, B),
     across_from(X, Y).
+
+cat_left_of_cat(A, B, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    left_of(X, Y).
+
+cat_right_of_cat(A, B, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    right_of(X, Y).
 
 cat_next_to_cat(A, B, Cats) :-
     nth0(X, Cats, A),
@@ -65,75 +84,37 @@ cat_next_to_place(A, P, Cats) :-
     nth0(Y, Places, P),
     next_to(X, Y).
 
-cat_right_of_cat(A, B, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
-    right_of(X, Y).
-
 pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
 
 solution1(Cats) :-
     cat_perms([mrmittens, pipsqueak], Cats),
-    places(Places),
-
-    nth0(TomCat, Cats, tomcat),
-    minutia(TomCat, catnip),
-    minutia(TomCat, sock),
-
-    nth0(Sassy, Cats, sassy),
-    across_from(Sassy, TomCat),
-
-    nth0(Ginger, Cats, ginger),
-    nth0(FishBowl, Places, fishbowl),
-    next_to(Ginger, FishBowl),
-
-    nth0(Duchess, Cats, duchess),
-    left_of(Duchess, Sassy),
-
+    cat_in_front_of_minutia(tomcat, catnip, Cats),
+    cat_in_front_of_minutia(tomcat, sock, Cats),
+    cat_across_from_cat(sassy, tomcat, Cats),
+    cat_next_to_place(ginger, fishbowl, Cats),
+    cat_left_of_cat(duchess, sassy, Cats),
     !.
 
 solution2(Cats) :-
     cat_perms([], Cats),
-    places(Places),
-
-    nth0(MrMittens, Cats, mrmittens),
-    nth0(MrMittens, Places, birdcage),
-
-    nth0(TomCat, Cats, tomcat),
-    across_from(MrMittens, TomCat),
-
-    nth0(PipSqueak, Cats, pipsqueak),
-    minutia(PipSqueak, mouse),
-
-    nth0(Duchess, Cats, duchess),
-    next_to(Duchess, PipSqueak),
-
-    nth0(Sassy, Cats, sassy),
-    nth0(Ginger, Cats, ginger),
-    next_to(Sassy, Ginger),
-
-    \+ across_from(Ginger, Duchess),
-
+    cat_in_front_of_place(mrmittens, birdcage, Cats),
+    cat_across_from_cat(tomcat, mrmittens, Cats),
+    cat_in_front_of_minutia(pipsqueak, mouse, Cats),
+    cat_next_to_cat(duchess, pipsqueak, Cats),
+    cat_next_to_cat(sassy, ginger, Cats),
+    \+ cat_across_from_cat(ginger, duchess, Cats),
     !.
 
 solution3(Cats) :-
     cat_perms([duchess, sassy, tomcat], Cats),
-    places(Places),
-
     nth0(Ginger, Cats, ginger),
     next_to(N, Ginger),
     some_cat(N, Cats),
-    nth0(FishBowl, Places, fishbowl),
-    \+ next_to(Ginger, FishBowl),
-
-    nth0(MrMittens, Cats, mrmittens),
-    MrMittens = FishBowl,
-
-    nth0(PipSqueak, Cats, pipsqueak),
-    minutia(PipSqueak, bellball),
-    minutia(PipSqueak, pawprint),
-
+    \+ cat_next_to_place(ginger, fishbowl, Cats),
+    cat_in_front_of_place(mrmittens, fishbowl, Cats),
+    cat_in_front_of_minutia(pipsqueak, bellball, Cats),
+    cat_in_front_of_minutia(pipsqueak, pawprint, Cats),
     !.
 
 solution4(Cats) :-
