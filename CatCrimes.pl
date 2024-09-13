@@ -221,6 +221,17 @@ solution8(Cats) :-
     cat_between_cats(duchess, tomcat, pipsqueak, Cats),
     !.
 
+solution9(Cats) :-
+    excluded_cat_perms([duchess], Cats),
+    cat_by_place(tomcat, birdcage, Cats),
+    cat_2_from_cat(sassy, tomcat, Cats),
+    (cat_next_to_cat(ginger, mrmittens, Cats);
+     cat_next_to_cat(ginger, pipsqueak, Cats)),
+    cat_right_of_cat(no_cat, ginger, Cats),
+    (cat_by_minutia2(mrmittens, bellball, pawprint, Cats);
+     cat_by_minutia2(mrmittens, catnip, clawmarks, Cats)),
+    !.
+
 pretty(Res) :-
     solution1(Cats),
     places(Places),
