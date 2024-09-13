@@ -44,6 +44,8 @@ minutia(4, pawprint).
 minutia(3, sock).
 minutia(5, sock).
 
+trait(blueeyes, ginger).
+trait(blueeyes, tomcat).
 trait(whitepaws, sassy).
 trait(whitepaws, mrmittens).
 
@@ -140,6 +142,12 @@ cat_next_to_some_cat(C, Cats) :-
     nth0(X, Cats, C),
     next_to(Y, X),
     some_cat(Y, Cats).
+
+cat_next_to_trait(C, T, Cats) :-
+    nth0(X, Cats, C),
+    trait(T, D),
+    nth0(Y, Cats, D),
+    next_to(X, Y).
 
 cat_between_some_cats(C, Cats) :-
     nth0(X, Cats, C),
@@ -262,6 +270,16 @@ solution11(Cats) :-
     cat_by_minutia(duchess, clawmarks, Cats),
     (cat_by_minutia2(pipsqueak, bellball, pawprint, Cats);
      cat_by_minutia2(pipsqueak, catnip, clawmarks, Cats)),
+    !.
+
+solution12(Cats) :-
+    cat_perms(Cats),
+    cat_by_place(duchess, fishbowl, Cats),
+    cat_next_to_cat(mrmittens, ginger, Cats),
+    cat_2_from_cat(sassy, duchess, Cats),
+    cat_next_to_trait(ginger, blueeyes, Cats),
+    cat_by_minutia(pipsqueak, pawprint, Cats),
+    cat_3_from_cat(tomcat, sassy, Cats),
     !.
 
 pretty(Res) :-
