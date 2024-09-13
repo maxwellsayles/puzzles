@@ -125,6 +125,11 @@ cat_2_from_cat(A, B, Cats) :-
     nth0(Y, Cats, B),
     next2_to(X, Y).
 
+cat_3_from_cat(A, B, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    Y is ((X + 3) mod 6).
+
 cat_next_to_place(A, P, Cats) :-
     places(Places),
     nth0(X, Cats, A),
@@ -230,6 +235,16 @@ solution9(Cats) :-
     cat_right_of_cat(no_cat, ginger, Cats),
     (cat_by_minutia2(mrmittens, bellball, pawprint, Cats);
      cat_by_minutia2(mrmittens, catnip, clawmarks, Cats)),
+    !.
+
+solution10(Cats) :-
+    cat_perms(Cats),
+    cat_between_cats(tomcat, pipsqueak, mrmittens, Cats),
+    cat_across_from_cat(sassy, tomcat, Cats),
+    cat_3_from_cat(mrmittens, duchess, Cats),
+    cat_across_from_cat(ginger, pipsqueak, Cats),
+    \+ cat_by_place(mrmittens, fishbowl, Cats),
+    cat_right_of_cat(ginger, duchess, Cats),
     !.
 
 pretty(Res) :-
