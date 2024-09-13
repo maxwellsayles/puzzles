@@ -141,6 +141,13 @@ cat_next_to_some_cat(C, Cats) :-
     next_to(Y, X),
     some_cat(Y, Cats).
 
+cat_between_some_cats(C, Cats) :-
+    nth0(X, Cats, C),
+    left_of(Y, X),
+    some_cat(Y, Cats),
+    right_of(Z, X),
+    some_cat(Z, Cats).
+
 trait_by_minutia(T, M, Cats) :-
     trait(T, C),
     nth0(X, Cats, C),
@@ -245,6 +252,16 @@ solution10(Cats) :-
     cat_across_from_cat(ginger, pipsqueak, Cats),
     \+ cat_by_place(mrmittens, fishbowl, Cats),
     cat_right_of_cat(ginger, duchess, Cats),
+    !.
+
+solution11(Cats) :-
+    excluded_cat_perms([tomcat, mrmittens], Cats),
+    cat_by_place(no_cat, fishbowl, Cats),
+    cat_between_cats(ginger, no_cat, no_cat, Cats),
+    cat_between_some_cats(sassy, Cats),
+    cat_by_minutia(duchess, clawmarks, Cats),
+    (cat_by_minutia2(pipsqueak, bellball, pawprint, Cats);
+     cat_by_minutia2(pipsqueak, catnip, clawmarks, Cats)),
     !.
 
 pretty(Res) :-
