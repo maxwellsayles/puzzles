@@ -161,9 +161,6 @@ trait_by_minutia(T, M, Cats) :-
     nth0(X, Cats, C),
     minutia(X, M).
 
-pretty_print(Cat, Place, Res) :-
-    swritef(Res, '%w => %w', [Cat, Place]).
-
 solution1(Cats) :-
     excluded_cat_perms([mrmittens, pipsqueak], Cats),
     cat_by_minutia(tomcat, catnip, Cats),
@@ -282,7 +279,21 @@ solution12(Cats) :-
     cat_3_from_cat(tomcat, sassy, Cats),
     !.
 
-pretty(Res) :-
-    solution1(Cats),
-    places(Places),
-    maplist(pretty_print, Cats, Places, Res).
+pretty_solution(Solution, X) :-
+    call(Solution, Cats),
+    atomics_to_string(Cats, ', ', Res),
+    writef('%d: %w\n', [X, Res]).
+
+main :-
+    pretty_solution(solution1, 1),
+    pretty_solution(solution2, 2),
+    pretty_solution(solution3, 3),
+    pretty_solution(solution4, 4),
+    pretty_solution(solution5, 5),
+    pretty_solution(solution6, 6),
+    pretty_solution(solution7, 7),
+    pretty_solution(solution8, 8),
+    pretty_solution(solution9, 9),
+    pretty_solution(solution10, 10),
+    pretty_solution(solution11, 11),
+    pretty_solution(solution12, 12).
