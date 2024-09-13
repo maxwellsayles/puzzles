@@ -112,6 +112,14 @@ cat_next_to_cat(A, B, Cats) :-
     nth0(Y, Cats, B),
     next_to(X, Y).
 
+cat_between_cats(B, A, C, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    nth0(Z, Cats, C),
+    next_to(X, Y),
+    next_to(Y, Z),
+    X \= Z.
+
 cat_2_from_cat(A, B, Cats) :-
     nth0(X, Cats, A),
     nth0(Y, Cats, B),
@@ -202,6 +210,15 @@ solution7(Cats) :-
     cat_2_from_cat(ginger, sassy, Cats),
     cat_right_of_cat(ginger, duchess, Cats),
     cat_across_from_cat(pipsqueak, duchess, Cats),
+    !.
+
+solution8(Cats) :-
+    cat_perms(Cats),
+    cat_by_place(sassy, birdcage, Cats),
+    cat_right_of_cat(mrmittens, ginger, Cats),
+    \+ cat_next_to_cat(ginger, sassy, Cats),
+    cat_right_of_cat(ginger, tomcat, Cats),
+    cat_between_cats(duchess, tomcat, pipsqueak, Cats),
     !.
 
 pretty(Res) :-
