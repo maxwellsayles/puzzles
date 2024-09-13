@@ -149,6 +149,23 @@ solution5(Cats) :-
     cat_across_from_cat(ginger, none_cat, Cats),
     !.
 
+solution6(Cats) :-
+    cat_perms([mrmittens, pipsqueak], Cats),
+
+    minutia(R1a, bellball),
+    minutia(R1a, pawprint),
+    nth0(R1a, Cats, none_cat),
+    minutia(R1b, catnip),
+    minutia(R1b, clawmarks),
+    nth0(R1b, Cats, none_cat),
+
+    cat_by_minutia(tomcat, mouse, Cats),
+    cat_by_minutia(duchess, sock, Cats),
+    cat_next_to_cat(ginger, sassy, Cats),
+    cat_next_to_place(sassy, fishbowl, Cats),
+    \+ cat_across_from_cat(ginger, tomcat, Cats),
+    !.
+
 pretty(Res) :-
     solution1(Cats),
     places(Places),
