@@ -60,8 +60,19 @@ left_of(X, Y) :- between(0, 5, X), between(0, 5, Y), Y is X - 1.
 right_of(5, 0).
 right_of(X, Y) :- between(0, 5, X), between(0, 5, Y), Y is X + 1.
 
+left2_of(X, Y) :-
+    left_of(X, Z),
+    left_of(Z, Y).
+
+right2_of(X, Y) :-
+    right_of(X, Z),
+    right_of(Z, Y).
+
 next_to(X, Y) :- left_of(X, Y).
 next_to(X, Y) :- right_of(X, Y).
+
+next2_to(X, Y) :- left2_of(X, Y).
+next2_to(X, Y) :- right2_of(X, Y).
 
 some_cat(X, Cats) :-
     nth0(X, Cats, Cat),
@@ -100,6 +111,11 @@ cat_next_to_cat(A, B, Cats) :-
     nth0(X, Cats, A),
     nth0(Y, Cats, B),
     next_to(X, Y).
+
+cat_2_from_cat(A, B, Cats) :-
+    nth0(X, Cats, A),
+    nth0(Y, Cats, B),
+    next2_to(X, Y).
 
 cat_next_to_place(A, P, Cats) :-
     places(Places),
@@ -176,6 +192,16 @@ solution6(Cats) :-
     cat_next_to_cat(ginger, sassy, Cats),
     cat_next_to_place(sassy, fishbowl, Cats),
     \+ cat_across_from_cat(ginger, tomcat, Cats),
+    !.
+
+solution7(Cats) :-
+    cat_perms(Cats),
+    cat_by_place(mrmittens, fishbowl, Cats),
+    cat_left_of_cat(sassy, mrmittens, Cats),
+    cat_by_minutia(tomcat, clawmarks, Cats),
+    cat_2_from_cat(ginger, sassy, Cats),
+    cat_right_of_cat(ginger, duchess, Cats),
+    cat_across_from_cat(pipsqueak, duchess, Cats),
     !.
 
 pretty(Res) :-
