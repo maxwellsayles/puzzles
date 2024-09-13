@@ -58,6 +58,11 @@ cat_by_minutia(C, M, Cats) :-
     nth0(X, Cats, C),
     minutia(X, M).
 
+cat_by_minutia2(C, M1, M2, Cats) :-
+    nth0(X, Cats, C),
+    minutia(X, M1),
+    minutia(X, M2).
+
 cat_by_place(C, P, Cats) :-
     places(Places),
     nth0(X, Cats, C),
@@ -151,14 +156,8 @@ solution5(Cats) :-
 
 solution6(Cats) :-
     cat_perms([mrmittens, pipsqueak], Cats),
-
-    minutia(R1a, bellball),
-    minutia(R1a, pawprint),
-    nth0(R1a, Cats, no_cat),
-    minutia(R1b, catnip),
-    minutia(R1b, clawmarks),
-    nth0(R1b, Cats, no_cat),
-
+    cat_by_minutia2(no_cat, bellball, pawprint, Cats),
+    cat_by_minutia2(no_cat, catnip, clawmarks, Cats),
     cat_by_minutia(tomcat, mouse, Cats),
     cat_by_minutia(duchess, sock, Cats),
     cat_next_to_cat(ginger, sassy, Cats),
