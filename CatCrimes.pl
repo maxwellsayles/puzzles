@@ -10,12 +10,25 @@ replicate(N, X, Ys) :-
 places(Places) :-
     Places = [birdcage, coffeecup, shoes, fishbowl, yarn, plant].
 
-cat_perms(SleepingCats, Cats) :-
-    InitCats = [duchess, ginger, mrmittens, pipsqueak, sassy, tomcat],
-    subtract(InitCats, SleepingCats, PresentCats),
+all_cats(Cats) :-
+    Cats = [duchess, ginger, mrmittens, pipsqueak, sassy, tomcat].
+
+cat_perms(Cats) :-
+    all_cats(T),
+    permutation(T, Cats).
+
+excluded_cat_perms(SleepingCats, Cats) :-
+    all_cats(AllCats),
+    subtract(AllCats, SleepingCats, PresentCats),
     length(SleepingCats, Cnt),
-    replicate(Cnt, no_cat, NoneCats),
-    append(PresentCats, NoneCats, SixCats),
+    replicate(Cnt, no_cat, NoCats),
+    append(PresentCats, NoCats, SixCats),
+    permutation(SixCats, Cats).
+
+included_cat_perms(IncludedCats, Cats) :-
+    length(IncludedCats, Cnt),
+    replicate(6 - Cnt, no_cat, NoCats),
+    append(IncludedCats, NoCats, SixCats),
     permutation(SixCats, Cats).
 
 minutia(1, bellball).
@@ -108,7 +121,7 @@ pretty_print(Cat, Place, Res) :-
     swritef(Res, '%w => %w', [Cat, Place]).
 
 solution1(Cats) :-
-    cat_perms([mrmittens, pipsqueak], Cats),
+    excluded_cat_perms([mrmittens, pipsqueak], Cats),
     cat_by_minutia(tomcat, catnip, Cats),
     cat_by_minutia(tomcat, sock, Cats),
     cat_across_from_cat(sassy, tomcat, Cats),
@@ -117,7 +130,7 @@ solution1(Cats) :-
     !.
 
 solution2(Cats) :-
-    cat_perms([], Cats),
+    cat_perms(Cats),
     cat_by_place(mrmittens, birdcage, Cats),
     cat_across_from_cat(tomcat, mrmittens, Cats),
     cat_by_minutia(pipsqueak, mouse, Cats),
@@ -127,7 +140,7 @@ solution2(Cats) :-
     !.
 
 solution3(Cats) :-
-    cat_perms([duchess, sassy, tomcat], Cats),
+    included_cat_perms([ginger, mrmittens, pipsqueak], Cats),
     cat_next_to_some_cat(ginger, Cats),
     \+ cat_next_to_place(ginger, fishbowl, Cats),
     cat_by_place(mrmittens, fishbowl, Cats),
@@ -136,7 +149,7 @@ solution3(Cats) :-
     !.
 
 solution4(Cats) :-
-    cat_perms([duchess, pipsqueak, tomcat], Cats),
+    included_cat_perms([ginger, sassy, mrmittens], Cats),
     cat_across_from_cat(ginger, sassy, Cats),
     cat_next_to_cat(sassy, mrmittens, Cats),
     cat_next_to_place(ginger, birdcage, Cats),
@@ -144,7 +157,7 @@ solution4(Cats) :-
     !.
 
 solution5(Cats) :-
-    cat_perms([tomcat, sassy, duchess], Cats),
+    excluded_cat_perms([tomcat, sassy, duchess], Cats),
     % no cat is sitting next to another
     ([no_cat, _, no_cat, _, no_cat, _] = Cats;
      [_, no_cat, _, no_cat, _, no_cat] = Cats),
@@ -155,7 +168,7 @@ solution5(Cats) :-
     !.
 
 solution6(Cats) :-
-    cat_perms([mrmittens, pipsqueak], Cats),
+    included_cat_perms([tomcat, duchess, ginger, sassy], Cats),
     cat_by_minutia2(no_cat, bellball, pawprint, Cats),
     cat_by_minutia2(no_cat, catnip, clawmarks, Cats),
     cat_by_minutia(tomcat, mouse, Cats),
