@@ -14,7 +14,7 @@ cat_perms(SleepingCats, Cats) :-
     InitCats = [duchess, ginger, mrmittens, pipsqueak, sassy, tomcat],
     subtract(InitCats, SleepingCats, PresentCats),
     length(SleepingCats, Cnt),
-    replicate(Cnt, none_cat, NoneCats),
+    replicate(Cnt, no_cat, NoneCats),
     append(PresentCats, NoneCats, SixCats),
     permutation(SixCats, Cats).
 
@@ -52,7 +52,7 @@ next_to(X, Y) :- right_of(X, Y).
 
 some_cat(X, Cats) :-
     nth0(X, Cats, Cat),
-    Cat \= none_cat.
+    Cat \= no_cat.
 
 cat_by_minutia(C, M, Cats) :-
     nth0(X, Cats, C),
@@ -141,12 +141,12 @@ solution4(Cats) :-
 solution5(Cats) :-
     cat_perms([tomcat, sassy, duchess], Cats),
     % no cat is sitting next to another
-    ([none_cat, _, none_cat, _, none_cat, _] = Cats;
-     [_, none_cat, _, none_cat, _, none_cat] = Cats),
+    ([no_cat, _, no_cat, _, no_cat, _] = Cats;
+     [_, no_cat, _, no_cat, _, no_cat] = Cats),
 
     trait_by_minutia(whitepaws, pawprint, Cats),
     cat_by_minutia(pipsqueak, clawmarks, Cats),
-    cat_across_from_cat(ginger, none_cat, Cats),
+    cat_across_from_cat(ginger, no_cat, Cats),
     !.
 
 solution6(Cats) :-
@@ -154,10 +154,10 @@ solution6(Cats) :-
 
     minutia(R1a, bellball),
     minutia(R1a, pawprint),
-    nth0(R1a, Cats, none_cat),
+    nth0(R1a, Cats, no_cat),
     minutia(R1b, catnip),
     minutia(R1b, clawmarks),
-    nth0(R1b, Cats, none_cat),
+    nth0(R1b, Cats, no_cat),
 
     cat_by_minutia(tomcat, mouse, Cats),
     cat_by_minutia(duchess, sock, Cats),
