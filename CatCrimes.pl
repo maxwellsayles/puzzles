@@ -340,6 +340,16 @@ solution16(Cats) :-
     cat_3_from_cat(pipsqueak, mrmittens, Cats),
     !.
 
+solution17(Cats) :-
+    excluded_cat_perms([mrmittens], Cats),
+    cat_across_from_cat(no_cat, pipsqueak, Cats),
+    cat_across_from_cat(ginger, tomcat, Cats),
+    cat_by_minutia(duchess, clawmarks, Cats),
+    cat_by_minutia(sassy, pawprint, Cats),
+    cat_by_minutia(no_cat, pawprint, Cats),
+    cat_by_minutia(tomcat, sock, Cats),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -361,4 +371,5 @@ main :-
     pretty_solution(solution13, 13),
     pretty_solution(solution14, 14),
     pretty_solution(solution15, 15),
-    pretty_solution(solution16, 16).
+    pretty_solution(solution16, 16),
+    pretty_solution(solution17, 17).
