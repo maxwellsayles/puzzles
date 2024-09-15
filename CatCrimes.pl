@@ -82,6 +82,8 @@ trait(bow, duchess).
 trait(bow, tomcat).
 trait(blueeyes, ginger).
 trait(blueeyes, tomcat).
+trait(longhair, duchess).
+trait(longhair, sassy).
 trait(whitepaws, sassy).
 trait(whitepaws, mrmittens).
 
@@ -207,6 +209,17 @@ cat_between_some_cats(C, Cats) :-
     some_cat(Y, Cats),
     right_of(Z, X),
     some_cat(Z, Cats).
+
+trait_by_place(T, P, Cats) :-
+    trait(T, C),
+    nth0(X, Cats, C),
+    place(X, P).
+
+trait_next_to_place(T, P, Cats) :-
+    trait(T, C),
+    nth0(X, Cats, C),
+    place(Y, P),
+    next_to(X, Y).
 
 trait_by_minutia(T, M, Cats) :-
     trait(T, C),
@@ -380,7 +393,7 @@ solution17(Cats) :-
     !.
 
 solution18(Cats) :-
-    choose_perms(5, Cats),
+    fancy_perms([sassy, ginger, pipsqueak, mrmittens], [bow, blueeyes, whitepaws], [], 5, Cats),
     cat_by_minutia2(no_cat, mouse, pawprint, Cats),
     cat_next_to_some_cat(sassy, Cats),
     cat_next_to_cat(sassy, no_cat, Cats),
@@ -388,6 +401,16 @@ solution18(Cats) :-
     cat_left_of_trait(pipsqueak, blueeyes, Cats),
     cat_left_of_cat(mrmittens, sassy, Cats),
     \+ cat_next_to_trait(ginger, whitepaws, Cats),
+    !.
+
+solution19(Cats) :-
+    fancy_perms([ginger, mrmittens, tomcat], [longhair, bow], [], 4, Cats),
+    [no_cat, _, _, no_cat, _, _] = Cats,
+    cat_by_minutia(ginger, pawprint, Cats),
+    cat_by_minutia(mrmittens, catnip, Cats),
+    cat_across_from_trait(ginger, longhair, Cats),
+    trait_next_to_place(bow, fishbowl, Cats),
+    \+ cat_next_to_place(tomcat, fishbowl, Cats),
     !.
 
 pretty_solution(Solution, X) :-
@@ -413,4 +436,5 @@ main :-
     pretty_solution(solution15, 15),
     pretty_solution(solution16, 16),
     pretty_solution(solution17, 17),
-    pretty_solution(solution18, 18).
+    pretty_solution(solution18, 18),
+    pretty_solution(solution19, 19).
