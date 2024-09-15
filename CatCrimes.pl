@@ -7,9 +7,6 @@ replicate(N, X, Ys) :-
     Ys = [X | Zs],
     !.
 
-places(Places) :-
-    Places = [birdcage, coffeecup, shoes, fishbowl, yarn, plant].
-
 all_cats(Cats) :-
     Cats = [duchess, ginger, mrmittens, pipsqueak, sassy, tomcat].
 
@@ -43,6 +40,13 @@ included_cat_perms(IncludedCats, Cats) :-
     replicate(6 - Cnt, no_cat, NoCats),
     append(IncludedCats, NoCats, SixCats),
     permutation(SixCats, Cats).
+
+place(0, birdcage).
+place(1, coffeecup).
+place(2, shoes).
+place(3, fishbowl).
+place(4, yarn).
+place(5, plant).
 
 minutia(1, bellball).
 minutia(3, bellball).
@@ -105,9 +109,8 @@ cat_by_minutia2(C, M1, M2, Cats) :-
     minutia(X, M2).
 
 cat_by_place(C, P, Cats) :-
-    places(Places),
     nth0(X, Cats, C),
-    nth0(X, Places, P).
+    place(X, P).
 
 cat_across_from_cat(A, B, Cats) :-
     nth0(X, Cats, A),
@@ -154,9 +157,8 @@ cat_3_from_cat(A, B, Cats) :-
     Y is ((X + 3) mod 6).
 
 cat_next_to_place(A, P, Cats) :-
-    places(Places),
     nth0(X, Cats, A),
-    nth0(Y, Places, P),
+    place(Y, P),
     next_to(X, Y).
 
 cat_next_to_some_cat(C, Cats) :-
