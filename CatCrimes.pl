@@ -7,8 +7,23 @@ replicate(N, X, Ys) :-
     Ys = [X | Zs],
     !.
 
+choose(0, _, Ys) :- Ys = [], !.
+choose(_, [], _) :- false.
+choose(N, [X | Xs], [X | Ys]) :-
+    M is N - 1,
+    choose(M, Xs, Ys).
+choose(N, [_ | Xs], Ys) :-
+    choose(N, Xs, Ys).
+
 all_cats(Cats) :-
     Cats = [duchess, ginger, mrmittens, pipsqueak, sassy, tomcat].
+
+choose_perms(N, Cats) :-
+    all_cats(Cs),
+    choose(N, Cs, CatSet),
+    replicate(6 - N, no_cat, NoCats),
+    append(CatSet, NoCats, SixCats),
+    permutation(SixCats, Cats).
 
 set_of_cats(MentionedCats, MentionedTraits, SleepingCats, SetSize, Cats) :-
     maplist([T, C]>>trait(T, C), MentionedTraits, TraitCats),
@@ -63,6 +78,8 @@ minutia(5, sock).
 
 trait(bell, mrmittens).
 trait(bell, pipsqueak).
+trait(bow, duchess).
+trait(bow, tomcat).
 trait(blueeyes, ginger).
 trait(blueeyes, tomcat).
 trait(whitepaws, sassy).
@@ -166,11 +183,23 @@ cat_next_to_some_cat(C, Cats) :-
     next_to(Y, X),
     some_cat(Y, Cats).
 
+cat_left_of_trait(C, T, Cats) :-
+    nth0(X, Cats, C),
+    trait(T, D),
+    nth0(Y, Cats, D),
+    left_of(X, Y).
+
 cat_next_to_trait(C, T, Cats) :-
     nth0(X, Cats, C),
     trait(T, D),
     nth0(Y, Cats, D),
     next_to(X, Y).
+
+cat_2_from_trait(C, T, Cats) :-
+    nth0(X, Cats, C),
+    trait(T, D),
+    nth0(Y, Cats, D),
+    next2_to(X, Y).
 
 cat_between_some_cats(C, Cats) :-
     nth0(X, Cats, C),
@@ -350,6 +379,17 @@ solution17(Cats) :-
     cat_by_minutia(tomcat, sock, Cats),
     !.
 
+solution18(Cats) :-
+    choose_perms(5, Cats),
+    cat_by_minutia2(no_cat, mouse, pawprint, Cats),
+    cat_next_to_some_cat(sassy, Cats),
+    cat_next_to_cat(sassy, no_cat, Cats),
+    cat_2_from_trait(ginger, bow, Cats),
+    cat_left_of_trait(pipsqueak, blueeyes, Cats),
+    cat_left_of_cat(mrmittens, sassy, Cats),
+    \+ cat_next_to_trait(ginger, whitepaws, Cats),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -372,4 +412,5 @@ main :-
     pretty_solution(solution14, 14),
     pretty_solution(solution15, 15),
     pretty_solution(solution16, 16),
-    pretty_solution(solution17, 17).
+    pretty_solution(solution17, 17),
+    pretty_solution(solution18, 18).
