@@ -413,6 +413,18 @@ solution19(Cats) :-
     \+ cat_next_to_place(tomcat, fishbowl, Cats),
     !.
 
+solution20(Cats) :-
+    cat_perms(Cats),
+    cat_across_from_cat(ginger, pipsqueak, Cats),
+    (cat_by_minutia2(duchess, mouse, clawmarks, Cats);
+     cat_by_minutia2(duchess, catnip, sock, Cats)),
+    cat_by_place(sassy, fishbowl, Cats),
+    cat_next_to_trait(tomcat, bell, Cats),
+    \+ cat_next_to_place(pipsqueak, fishbowl, Cats),
+    (cat_by_minutia2(mrmittens, bellball, pawprint, Cats);
+     cat_by_minutia2(mrmittens, catnip, clawmarks, Cats)),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -437,4 +449,5 @@ main :-
     pretty_solution(solution16, 16),
     pretty_solution(solution17, 17),
     pretty_solution(solution18, 18),
-    pretty_solution(solution19, 19).
+    pretty_solution(solution19, 19),
+    pretty_solution(solution20, 20).
