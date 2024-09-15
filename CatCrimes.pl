@@ -184,8 +184,7 @@ trait_by_minutia(T, M, Cats) :-
 
 solution1(Cats) :-
     excluded_cat_perms([mrmittens, pipsqueak], Cats),
-    cat_by_minutia(tomcat, catnip, Cats),
-    cat_by_minutia(tomcat, sock, Cats),
+    cat_by_minutia2(tomcat, catnip, sock, Cats),
     cat_across_from_cat(sassy, tomcat, Cats),
     cat_next_to_place(ginger, fishbowl, Cats),
     cat_left_of_cat(duchess, sassy, Cats),
@@ -206,8 +205,7 @@ solution3(Cats) :-
     cat_next_to_some_cat(ginger, Cats),
     \+ cat_next_to_place(ginger, fishbowl, Cats),
     cat_by_place(mrmittens, fishbowl, Cats),
-    cat_by_minutia(pipsqueak, bellball, Cats),
-    cat_by_minutia(pipsqueak, pawprint, Cats),
+    cat_by_minutia2(pipsqueak, bellball, pawprint, Cats),
     !.
 
 solution4(Cats) :-
