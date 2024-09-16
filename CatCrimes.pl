@@ -440,6 +440,16 @@ solution24(Cats) :-
     \+ rel(ginger, next_to, mrmittens, Cats),
     !.
 
+solution25(Cats) :-
+    cat_perms(Cats),
+    rel(ginger, left_of, tomcat, Cats),
+    rel(duchess, next3_to, pipsqueak, Cats),
+    rel(ginger, next2_to, pipsqueak, Cats),
+    rel(sassy, right_of, mrmittens, Cats),
+    rel(mrmittens, across_from, duchess, Cats),
+    \+ rel(ginger, next_to, birdcage, Cats),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -469,4 +479,5 @@ main :-
     pretty_solution(solution21, 21),
     pretty_solution(solution22, 22),
     pretty_solution(solution23, 23),
-    pretty_solution(solution24, 24).
+    pretty_solution(solution24, 24),
+    pretty_solution(solution25, 25).
