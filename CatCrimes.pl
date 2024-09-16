@@ -142,6 +142,9 @@ idx(M, Idx, _) :-
 idx(minutia2(M1, M2), Idx, Cats) :-
     idx(M1, Idx, Cats),
     idx(M2, Idx, Cats).
+idx((I1; I2), Idx, Cats) :-
+    (idx(I1, Idx, Cats);
+     idx(I2, Idx, Cats)).
 
 near(X, X).
 
@@ -428,6 +431,16 @@ solution23(Cats) :-
     rel(sassy, is_between, mrmittens, duchess, Cats),
     !.
 
+solution24(Cats) :-
+    cat_perms(Cats),
+    rel(tomcat, across_from, sassy, Cats),
+    rel(ginger, across_from, pipsqueak, Cats),
+    rel(tomcat, near, bellball, Cats),
+    rel(ginger, next2_to, duchess, Cats),
+    rel(duchess, near, (catnip; bellball), Cats),
+    \+ rel(ginger, next_to, mrmittens, Cats),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -456,4 +469,5 @@ main :-
     pretty_solution(solution20, 20),
     pretty_solution(solution21, 21),
     pretty_solution(solution22, 22),
-    pretty_solution(solution23, 23).
+    pretty_solution(solution23, 23),
+    pretty_solution(solution24, 24).
