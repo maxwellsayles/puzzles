@@ -278,11 +278,10 @@ solution9(Cats) :-
     excluded_cat_perms([duchess], Cats),
     rel(tomcat, near, birdcage, Cats),
     rel(sassy, next2_to, tomcat, Cats),
-    (rel(ginger, next_to, mrmittens, Cats);
-     rel(ginger, next_to, pipsqueak, Cats)),
+    rel(ginger, next_to, (mrmittens; pipsqueak), Cats),
     rel(no_cat, right_of, ginger, Cats),
-    (rel(mrmittens, near, minutia2(bellball, pawprint), Cats);
-     rel(mrmittens, near, minutia2(catnip, clawmarks), Cats)),
+    rel(mrmittens, near, (minutia2(bellball, pawprint);
+			  minutia2(catnip, clawmarks)), Cats),
     !.
 
 solution10(Cats) :-
@@ -301,8 +300,8 @@ solution11(Cats) :-
     rel(ginger, is_between, no_cat, no_cat, Cats),
     rel(sassy, is_between, some_cat, some_cat, Cats),
     rel(duchess, near, clawmarks, Cats),
-    (rel(pipsqueak, near, minutia2(bellball, pawprint), Cats);
-     rel(pipsqueak, near, minutia2(catnip, clawmarks), Cats)),
+    rel(pipsqueak, near, (minutia2(bellball, pawprint);
+			  minutia2(catnip, clawmarks)), Cats),
     !.
 
 solution12(Cats) :-
@@ -387,13 +386,13 @@ solution19(Cats) :-
 solution20(Cats) :-
     cat_perms(Cats),
     rel(ginger, across_from, pipsqueak, Cats),
-    (rel(duchess, near, minutia2(mouse, clawmarks), Cats);
-     rel(duchess, near, minutia2(catnip, sock), Cats)),
+    rel(duchess, near, (minutia2(mouse, clawmarks);
+			minutia2(catnip, sock)), Cats),
     rel(sassy, near, fishbowl, Cats),
     rel(tomcat, next_to, bell, Cats),
     \+ rel(pipsqueak, next_to, fishbowl, Cats),
-    (rel(mrmittens, near, minutia2(bellball, pawprint), Cats);
-     rel(mrmittens, near, minutia2(catnip, clawmarks), Cats)),
+    rel(mrmittens, near, (minutia2(bellball, pawprint);
+			  minutia2(catnip, clawmarks)), Cats),
     !.
 
 solution21(Cats) :-
