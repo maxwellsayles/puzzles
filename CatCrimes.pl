@@ -403,6 +403,21 @@ solution21(Cats) :-
     \+ rel(ginger, across_from, sock, Cats),
     !.
 
+solution22(Cats) :-
+    fancy_perms(
+	[duchess, pipsqueak, sassy, ginger, tomcat],
+	[longhair, whitepaws],
+	[],
+	5,
+	Cats),
+    rel(duchess, near, mouse, Cats),
+    rel(no_cat, right_of, duchess, Cats),
+    rel(pipsqueak, next_to, sassy, Cats),
+    rel(ginger, right_of, longhair, Cats),
+    rel(whitepaws, across_from, duchess, Cats),
+    rel(ginger, left_of, tomcat, Cats),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -429,4 +444,5 @@ main :-
     pretty_solution(solution18, 18),
     pretty_solution(solution19, 19),
     pretty_solution(solution20, 20),
-    pretty_solution(solution21, 21).
+    pretty_solution(solution21, 21),
+    pretty_solution(solution22, 22).
