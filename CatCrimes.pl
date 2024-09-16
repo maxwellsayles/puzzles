@@ -26,7 +26,7 @@ choose_perms(N, Cats) :-
     permutation(SixCats, Cats).
 
 set_of_cats(MentionedCats, MentionedTraits, SleepingCats, SetSize, Cats) :-
-    maplist([T, C]>>trait(T, C), MentionedTraits, TraitCats),
+    maplist([T, C]>>trait_to_cat(T, C), MentionedTraits, TraitCats),
     append(MentionedCats, TraitCats, Cats1),
     list_to_set(Cats1, CatSet1),
     subtract(CatSet1, SleepingCats, Cats),
@@ -56,36 +56,94 @@ included_cat_perms(IncludedCats, Cats) :-
     append(IncludedCats, NoCats, SixCats),
     permutation(SixCats, Cats).
 
-place(0, birdcage).
-place(1, coffeecup).
-place(2, shoes).
-place(3, fishbowl).
-place(4, yarn).
-place(5, plant).
+cat(duchess).
+cat(ginger).
+cat(mrmittens).
+cat(pipsqueak).
+cat(sassy).
+cat(tomcat).
 
-minutia(1, bellball).
-minutia(3, bellball).
-minutia(2, catnip).
-minutia(5, catnip).
-minutia(0, clawmarks).
-minutia(2, clawmarks).
-minutia(0, mouse).
-minutia(4, mouse).
-minutia(1, pawprint).
-minutia(4, pawprint).
-minutia(3, sock).
-minutia(5, sock).
+place(birdcage).
+place(coffeecup).
+place(fishbowl).
+place(shoes).
+place(plant).
+place(yarn).
 
-trait(bell, mrmittens).
-trait(bell, pipsqueak).
-trait(bow, duchess).
-trait(bow, tomcat).
-trait(blueeyes, ginger).
-trait(blueeyes, tomcat).
-trait(longhair, duchess).
-trait(longhair, sassy).
-trait(whitepaws, sassy).
-trait(whitepaws, mrmittens).
+minutia(bellball).
+minutia(catnip).
+minutia(clawmarks).
+minutia(mouse).
+minutia(pawprint).
+minutia(sock).
+
+minutia2(M1, M2) :-
+    minutia(M1),
+    minutia(M2),
+    M1 \= M2.
+
+trait(bell).
+trait(bow).
+trait(blueeyes).
+trait(longhair).
+trait(whitepaws).
+
+place_to_idx(birdcage, 0).
+place_to_idx(coffeecup, 1).
+place_to_idx(shoes, 2).
+place_to_idx(fishbowl, 3).
+place_to_idx(yarn, 4).
+place_to_idx(plant, 5).
+
+minutia_to_idx(bellball, 1).
+minutia_to_idx(bellball, 3).
+minutia_to_idx(catnip, 2).
+minutia_to_idx(catnip, 5).
+minutia_to_idx(clawmarks, 0).
+minutia_to_idx(clawmarks, 2).
+minutia_to_idx(mouse, 0).
+minutia_to_idx(mouse, 4).
+minutia_to_idx(pawprint, 1).
+minutia_to_idx(pawprint, 4).
+minutia_to_idx(sock, 3).
+minutia_to_idx(sock, 5).
+
+trait_to_cat(bell, mrmittens).
+trait_to_cat(bell, pipsqueak).
+trait_to_cat(bow, duchess).
+trait_to_cat(bow, tomcat).
+trait_to_cat(blueeyes, ginger).
+trait_to_cat(blueeyes, tomcat).
+trait_to_cat(longhair, duchess).
+trait_to_cat(longhair, sassy).
+trait_to_cat(whitepaws, sassy).
+trait_to_cat(whitepaws, mrmittens).
+
+idx(C, Idx, Cats) :-
+    cat(C),
+    nth0(Idx, Cats, C),
+    !.
+idx(no_cat, Idx, Cats) :-
+    nth0(Idx, Cats, no_cat).
+idx(some_cat, Idx, Cats) :-
+    nth0(Idx, Cats, C),
+    C \= no_cat.
+idx(P, Idx, _) :-
+    place(P),
+    place_to_idx(P, Idx),
+    !.
+idx(T, Idx, Cats) :-
+    trait(T),
+    trait_to_cat(T, C),
+    nth0(Idx, Cats, C).
+idx(M, Idx, _) :-
+    minutia(M),
+    minutia_to_idx(M, Idx).
+idx(minutia2(M1, M2), Idx, Cats) :-
+    idx(M1, Idx, Cats),
+    idx(M2, Idx, Cats).
+
+near(X, X).
 
 across_from(0, 3).
 across_from(1, 5).
@@ -95,14 +153,20 @@ across_from(4, 2).
 across_from(5, 1).
 
 left_of(0, 5).
-left_of(X, Y) :- between(0, 5, X), between(0, 5, Y), Y is X - 1.
-
-right_of(5, 0).
-right_of(X, Y) :- between(0, 5, X), between(0, 5, Y), Y is X + 1.
+left_of(X, Y) :-
+    between(0, 5, X),
+    between(0, 5, Y),
+    Y is X - 1.
 
 left2_of(X, Y) :-
     left_of(X, Z),
     left_of(Z, Y).
+
+right_of(5, 0).
+right_of(X, Y) :-
+    between(0, 5, X),
+    between(0, 5, Y),
+    Y is X + 1.
 
 right2_of(X, Y) :-
     right_of(X, Z),
@@ -114,315 +178,219 @@ next_to(X, Y) :- right_of(X, Y).
 next2_to(X, Y) :- left2_of(X, Y).
 next2_to(X, Y) :- right2_of(X, Y).
 
-some_cat(X, Cats) :-
-    nth0(X, Cats, Cat),
-    Cat \= no_cat.
-
-cat_by_minutia(C, M, Cats) :-
-    nth0(X, Cats, C),
-    minutia(X, M).
-
-cat_by_minutia2(C, M1, M2, Cats) :-
-    nth0(X, Cats, C),
-    minutia(X, M1),
-    minutia(X, M2).
-
-cat_by_place(C, P, Cats) :-
-    nth0(X, Cats, C),
-    place(X, P).
-
-cat_across_from_cat(A, B, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
-    across_from(X, Y).
-
-cat_across_from_trait(C, T, Cats) :-
-    nth0(X, Cats, C),
-    trait(T, D),
-    nth0(Y, Cats, D),
-    across_from(X, Y).
-
-cat_left_of_cat(A, B, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
-    left_of(X, Y).
-
-cat_right_of_cat(A, B, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
-    right_of(X, Y).
-
-cat_next_to_cat(A, B, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
-    next_to(X, Y).
-
-cat_between_cats(B, A, C, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
-    nth0(Z, Cats, C),
-    next_to(X, Y),
-    next_to(Y, Z),
-    X \= Z.
-
-cat_2_from_cat(A, B, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
-    next2_to(X, Y).
-
-cat_3_from_cat(A, B, Cats) :-
-    nth0(X, Cats, A),
-    nth0(Y, Cats, B),
+next3_to(X, Y) :-
+    between(0, 5, X),
+    between(0, 5, Y),
     Y is ((X + 3) mod 6).
 
-cat_next_to_place(A, P, Cats) :-
-    nth0(X, Cats, A),
-    place(Y, P),
-    next_to(X, Y).
+is_between(X, Y1, Y2) :-
+    next_to(X, Y1),
+    next_to(X, Y2),
+    Y1 \= Y2.
 
-cat_next_to_some_cat(C, Cats) :-
-    nth0(X, Cats, C),
-    next_to(Y, X),
-    some_cat(Y, Cats).
+rel(A, R, B, Cats) :-
+    idx(A, X, Cats),
+    idx(B, Y, Cats),
+    call(R, X, Y).
 
-cat_left_of_trait(C, T, Cats) :-
-    nth0(X, Cats, C),
-    trait(T, D),
-    nth0(Y, Cats, D),
-    left_of(X, Y).
-
-cat_next_to_trait(C, T, Cats) :-
-    nth0(X, Cats, C),
-    trait(T, D),
-    nth0(Y, Cats, D),
-    next_to(X, Y).
-
-cat_2_from_trait(C, T, Cats) :-
-    nth0(X, Cats, C),
-    trait(T, D),
-    nth0(Y, Cats, D),
-    next2_to(X, Y).
-
-cat_between_some_cats(C, Cats) :-
-    nth0(X, Cats, C),
-    left_of(Y, X),
-    some_cat(Y, Cats),
-    right_of(Z, X),
-    some_cat(Z, Cats).
-
-trait_by_place(T, P, Cats) :-
-    trait(T, C),
-    nth0(X, Cats, C),
-    place(X, P).
-
-trait_next_to_place(T, P, Cats) :-
-    trait(T, C),
-    nth0(X, Cats, C),
-    place(Y, P),
-    next_to(X, Y).
-
-trait_by_minutia(T, M, Cats) :-
-    trait(T, C),
-    nth0(X, Cats, C),
-    minutia(X, M).
+rel(A, R, B1, B2, Cats) :-
+    idx(A, X, Cats),
+    idx(B1, Y1, Cats),
+    idx(B2, Y2, Cats),
+    call(R, X, Y1, Y2).
 
 solution1(Cats) :-
     excluded_cat_perms([mrmittens, pipsqueak], Cats),
-    cat_by_minutia2(tomcat, catnip, sock, Cats),
-    cat_across_from_cat(sassy, tomcat, Cats),
-    cat_next_to_place(ginger, fishbowl, Cats),
-    cat_left_of_cat(duchess, sassy, Cats),
+    rel(tomcat, near, minutia2(catnip, sock), Cats),
+    rel(sassy, across_from, tomcat, Cats),
+    rel(ginger, next_to, fishbowl, Cats),
+    rel(duchess, left_of, sassy, Cats),
     !.
 
 solution2(Cats) :-
     cat_perms(Cats),
-    cat_by_place(mrmittens, birdcage, Cats),
-    cat_across_from_cat(tomcat, mrmittens, Cats),
-    cat_by_minutia(pipsqueak, mouse, Cats),
-    cat_next_to_cat(duchess, pipsqueak, Cats),
-    cat_next_to_cat(sassy, ginger, Cats),
-    \+ cat_across_from_cat(ginger, duchess, Cats),
+    rel(mrmittens, near, birdcage, Cats),
+    rel(tomcat, across_from, mrmittens, Cats),
+    rel(pipsqueak, near, mouse, Cats),
+    rel(duchess, next_to, pipsqueak, Cats),
+    rel(sassy, next_to, ginger, Cats),
+    \+ rel(ginger, across_from, duchess, Cats),
     !.
 
 solution3(Cats) :-
     included_cat_perms([ginger, mrmittens, pipsqueak], Cats),
-    cat_next_to_some_cat(ginger, Cats),
-    \+ cat_next_to_place(ginger, fishbowl, Cats),
-    cat_by_place(mrmittens, fishbowl, Cats),
-    cat_by_minutia2(pipsqueak, bellball, pawprint, Cats),
+    rel(ginger, next_to, some_cat, Cats),
+    \+ rel(ginger, next_to, fishbowl, Cats),
+    rel(mrmittens, near, fishbowl, Cats),
+    rel(pipsqueak, near, minutia2(bellball, pawprint), Cats),
     !.
 
 solution4(Cats) :-
     included_cat_perms([ginger, sassy, mrmittens], Cats),
-    cat_across_from_cat(ginger, sassy, Cats),
-    cat_next_to_cat(sassy, mrmittens, Cats),
-    cat_next_to_place(ginger, birdcage, Cats),
-    cat_right_of_cat(ginger, mrmittens, Cats),
+    rel(ginger, across_from, sassy, Cats),
+    rel(sassy, next_to, mrmittens, Cats),
+    rel(ginger, next_to, birdcage, Cats),
+    rel(ginger, right_of, mrmittens, Cats),
     !.
 
 solution5(Cats) :-
     excluded_cat_perms([tomcat, sassy, duchess], Cats),
-    % no cat is sitting next to another
     ([no_cat, _, no_cat, _, no_cat, _] = Cats;
      [_, no_cat, _, no_cat, _, no_cat] = Cats),
-
-    trait_by_minutia(whitepaws, pawprint, Cats),
-    cat_by_minutia(pipsqueak, clawmarks, Cats),
-    cat_across_from_cat(ginger, no_cat, Cats),
+    rel(whitepaws, near, pawprint, Cats),
+    rel(pipsqueak, near, clawmarks, Cats),
+    rel(ginger, across_from, no_cat, Cats),
     !.
 
 solution6(Cats) :-
     included_cat_perms([tomcat, duchess, ginger, sassy], Cats),
-    cat_by_minutia2(no_cat, bellball, pawprint, Cats),
-    cat_by_minutia2(no_cat, catnip, clawmarks, Cats),
-    cat_by_minutia(tomcat, mouse, Cats),
-    cat_by_minutia(duchess, sock, Cats),
-    cat_next_to_cat(ginger, sassy, Cats),
-    cat_next_to_place(sassy, fishbowl, Cats),
-    \+ cat_across_from_cat(ginger, tomcat, Cats),
+    rel(no_cat, near, minutia2(bellball, pawprint), Cats),
+    rel(no_cat, near, minutia2(catnip, clawmarks), Cats),
+    rel(tomcat, near, mouse, Cats),
+    rel(duchess, near, sock, Cats),
+    rel(ginger, next_to, sassy, Cats),
+    rel(sassy, next_to, fishbowl, Cats),
+    \+ rel(ginger, across_from, tomcat, Cats),
     !.
 
 solution7(Cats) :-
     cat_perms(Cats),
-    cat_by_place(mrmittens, fishbowl, Cats),
-    cat_left_of_cat(sassy, mrmittens, Cats),
-    cat_by_minutia(tomcat, clawmarks, Cats),
-    cat_2_from_cat(ginger, sassy, Cats),
-    cat_right_of_cat(ginger, duchess, Cats),
-    cat_across_from_cat(pipsqueak, duchess, Cats),
+    rel(mrmittens, near, fishbowl, Cats),
+    rel(sassy, left_of, mrmittens, Cats),
+    rel(tomcat, near, clawmarks, Cats),
+    rel(ginger, next2_to, sassy, Cats),
+    rel(pipsqueak, across_from, duchess, Cats),
     !.
 
 solution8(Cats) :-
     cat_perms(Cats),
-    cat_by_place(sassy, birdcage, Cats),
-    cat_right_of_cat(mrmittens, ginger, Cats),
-    \+ cat_next_to_cat(ginger, sassy, Cats),
-    cat_right_of_cat(ginger, tomcat, Cats),
-    cat_between_cats(duchess, tomcat, pipsqueak, Cats),
+    rel(sassy, near, birdcage, Cats),
+    rel(mrmittens, right_of, ginger, Cats),
+    \+ rel(ginger, next_to, sassy, Cats),
+    rel(ginger, right_of, tomcat, Cats),
+    rel(duchess, is_between, tomcat, pipsqueak, Cats),
     !.
 
 solution9(Cats) :-
     excluded_cat_perms([duchess], Cats),
-    cat_by_place(tomcat, birdcage, Cats),
-    cat_2_from_cat(sassy, tomcat, Cats),
-    (cat_next_to_cat(ginger, mrmittens, Cats);
-     cat_next_to_cat(ginger, pipsqueak, Cats)),
-    cat_right_of_cat(no_cat, ginger, Cats),
-    (cat_by_minutia2(mrmittens, bellball, pawprint, Cats);
-     cat_by_minutia2(mrmittens, catnip, clawmarks, Cats)),
+    rel(tomcat, near, birdcage, Cats),
+    rel(sassy, next2_to, tomcat, Cats),
+    (rel(ginger, next_to, mrmittens, Cats);
+     rel(ginger, next_to, pipsqueak, Cats)),
+    rel(no_cat, right_of, ginger, Cats),
+    (rel(mrmittens, near, minutia2(bellball, pawprint), Cats);
+     rel(mrmittens, near, minutia2(catnip, clawmarks), Cats)),
     !.
 
 solution10(Cats) :-
     cat_perms(Cats),
-    cat_between_cats(tomcat, pipsqueak, mrmittens, Cats),
-    cat_across_from_cat(sassy, tomcat, Cats),
-    cat_3_from_cat(mrmittens, duchess, Cats),
-    cat_across_from_cat(ginger, pipsqueak, Cats),
-    \+ cat_by_place(mrmittens, fishbowl, Cats),
-    cat_right_of_cat(ginger, duchess, Cats),
+    rel(tomcat, is_between, pipsqueak, mrmittens, Cats),
+    rel(sassy, across_from, tomcat, Cats),
+    rel(mrmittens, next3_to, duchess, Cats),
+    rel(ginger, across_from, pipsqueak, Cats),
+    \+ rel(mrmittens, near, fishbowl, Cats),
+    rel(ginger, right_of, duchess, Cats),
     !.
 
 solution11(Cats) :-
     excluded_cat_perms([tomcat, mrmittens], Cats),
-    cat_by_place(no_cat, fishbowl, Cats),
-    cat_between_cats(ginger, no_cat, no_cat, Cats),
-    cat_between_some_cats(sassy, Cats),
-    cat_by_minutia(duchess, clawmarks, Cats),
-    (cat_by_minutia2(pipsqueak, bellball, pawprint, Cats);
-     cat_by_minutia2(pipsqueak, catnip, clawmarks, Cats)),
+    rel(no_cat, near, fishbowl, Cats),
+    rel(ginger, is_between, no_cat, no_cat, Cats),
+    rel(sassy, is_between, some_cat, some_cat, Cats),
+    rel(duchess, near, clawmarks, Cats),
+    (rel(pipsqueak, near, minutia2(bellball, pawprint), Cats);
+     rel(pipsqueak, near, minutia2(catnip, clawmarks), Cats)),
     !.
 
 solution12(Cats) :-
     cat_perms(Cats),
-    cat_by_place(duchess, fishbowl, Cats),
-    cat_next_to_cat(mrmittens, ginger, Cats),
-    cat_2_from_cat(sassy, duchess, Cats),
-    cat_next_to_trait(ginger, blueeyes, Cats),
-    cat_by_minutia(pipsqueak, pawprint, Cats),
-    cat_3_from_cat(tomcat, sassy, Cats),
+    rel(duchess, near, fishbowl, Cats),
+    rel(mrmittens, next_to, ginger, Cats),
+    rel(sassy, next2_to, duchess, Cats),
+    rel(ginger, next_to, blueeyes, Cats),
+    rel(pipsqueak, near, pawprint, Cats),
+    rel(tomcat, next3_to, sassy, Cats),
     !.
 
 solution13(Cats) :-
     cat_perms(Cats),
-    cat_across_from_cat(mrmittens, duchess, Cats),
-    cat_across_from_cat(pipsqueak, sassy, Cats),
-    cat_by_minutia(tomcat, bellball, Cats),
-    cat_by_minutia(sassy, bellball, Cats),
-    cat_by_minutia(ginger, catnip, Cats),
-    cat_3_from_cat(tomcat, mrmittens, Cats),
+    rel(mrmittens, across_from, duchess, Cats),
+    rel(pipsqueak, across_from, sassy, Cats),
+    rel(tomcat, near, bellball, Cats),
+    rel(sassy, near, bellball, Cats),
+    rel(ginger, near, catnip, Cats),
+    rel(tomcat, next3_to, mrmittens, Cats),
     !.
 
 solution14(Cats) :-
     cat_perms(Cats),
-    cat_by_minutia2(sassy, catnip, sock, Cats),
-    \+ cat_next_to_trait(ginger, bell, Cats),
-    \+ cat_next_to_trait(ginger, whitepaws, Cats),
-    cat_3_from_cat(pipsqueak, tomcat, Cats),
-    \+ cat_across_from_cat(ginger, sassy, Cats),
-    \+ cat_by_minutia(pipsqueak, mouse, Cats),
-    cat_next_to_cat(duchess, pipsqueak, Cats),
+    rel(sassy, near, minutia2(catnip, sock), Cats),
+    \+ rel(ginger, next_to, bell, Cats),
+    \+ rel(ginger, next_to, whitepaws, Cats),
+    rel(pipsqueak, next3_to, tomcat, Cats),
+    \+ rel(ginger, across_from, sassy, Cats),
+    \+ rel(pipsqueak, near, mouse, Cats),
+    rel(duchess, next_to, pipsqueak, Cats),
     !.
 
 solution15(Cats) :-
     fancy_perms([tomcat, ginger], [bell, whitepaws], [], 3, Cats),
-    % no cat is sitting next to another
     ([no_cat, _, no_cat, _, no_cat, _] = Cats;
      [_, no_cat, _, no_cat, _, no_cat] = Cats),
-    trait_by_minutia(bell, pawprint, Cats),
-    cat_by_minutia(tomcat, bellball, Cats),
-    cat_across_from_trait(ginger, whitepaws, Cats),
+    rel(bell, near, pawprint, Cats),
+    rel(tomcat, near, bellball, Cats),
+    rel(ginger, across_from, whitepaws, Cats),
     !.
 
 solution16(Cats) :-
     cat_perms(Cats),
-    cat_left_of_cat(tomcat, sassy, Cats),
-    \+ cat_across_from_cat(ginger, mrmittens, Cats),
-    cat_by_place(duchess, birdcage, Cats),
-    \+ cat_next_to_cat(tomcat, pipsqueak, Cats),
-    cat_3_from_cat(pipsqueak, mrmittens, Cats),
+    rel(tomcat, left_of, sassy, Cats),
+    \+ rel(ginger, across_from, mrmittens, Cats),
+    rel(duchess, near, birdcage, Cats),
+    \+ rel(tomcat, next_to, pipsqueak, Cats),
+    rel(pipsqueak, next3_to, mrmittens, Cats),
     !.
 
 solution17(Cats) :-
     excluded_cat_perms([mrmittens], Cats),
-    cat_across_from_cat(no_cat, pipsqueak, Cats),
-    cat_across_from_cat(ginger, tomcat, Cats),
-    cat_by_minutia(duchess, clawmarks, Cats),
-    cat_by_minutia(sassy, pawprint, Cats),
-    cat_by_minutia(no_cat, pawprint, Cats),
-    cat_by_minutia(tomcat, sock, Cats),
+    rel(no_cat, across_from, pipsqueak, Cats),
+    rel(ginger, across_from, tomcat, Cats),
+    rel(duchess, near, clawmarks, Cats),
+    rel(sassy, near, pawprint, Cats),
+    rel(no_cat, near, pawprint, Cats),
+    rel(tomcat, near, sock, Cats),
     !.
 
 solution18(Cats) :-
     fancy_perms([sassy, ginger, pipsqueak, mrmittens], [bow, blueeyes, whitepaws], [], 5, Cats),
-    cat_by_minutia2(no_cat, mouse, pawprint, Cats),
-    cat_next_to_some_cat(sassy, Cats),
-    cat_next_to_cat(sassy, no_cat, Cats),
-    cat_2_from_trait(ginger, bow, Cats),
-    cat_left_of_trait(pipsqueak, blueeyes, Cats),
-    cat_left_of_cat(mrmittens, sassy, Cats),
-    \+ cat_next_to_trait(ginger, whitepaws, Cats),
+    rel(no_cat, near, minutia2(mouse, pawprint), Cats),
+    rel(sassy, is_between, some_cat, no_cat, Cats),
+    rel(ginger, next2_to, bow, Cats),
+    rel(pipsqueak, left_of, blueeyes, Cats),
+    rel(mrmittens, left_of, sassy, Cats),
+    \+ rel(ginger, next_to, whitepaws, Cats),
     !.
 
 solution19(Cats) :-
     fancy_perms([ginger, mrmittens, tomcat], [longhair, bow], [], 4, Cats),
     [no_cat, _, _, no_cat, _, _] = Cats,
-    cat_by_minutia(ginger, pawprint, Cats),
-    cat_by_minutia(mrmittens, catnip, Cats),
-    cat_across_from_trait(ginger, longhair, Cats),
-    trait_next_to_place(bow, fishbowl, Cats),
-    \+ cat_next_to_place(tomcat, fishbowl, Cats),
+    rel(ginger, near, pawprint, Cats),
+    rel(mrmittens, near, catnip, Cats),
+    rel(ginger, across_from, longhair, Cats),
+    rel(bow, next_to, fishbowl, Cats),
+    \+ rel(tomcat, next_to, fishbowl, Cats),
     !.
 
 solution20(Cats) :-
     cat_perms(Cats),
-    cat_across_from_cat(ginger, pipsqueak, Cats),
-    (cat_by_minutia2(duchess, mouse, clawmarks, Cats);
-     cat_by_minutia2(duchess, catnip, sock, Cats)),
-    cat_by_place(sassy, fishbowl, Cats),
-    cat_next_to_trait(tomcat, bell, Cats),
-    \+ cat_next_to_place(pipsqueak, fishbowl, Cats),
-    (cat_by_minutia2(mrmittens, bellball, pawprint, Cats);
-     cat_by_minutia2(mrmittens, catnip, clawmarks, Cats)),
+    rel(ginger, across_from, pipsqueak, Cats),
+    (rel(duchess, near, minutia2(mouse, clawmarks), Cats);
+     rel(duchess, near, minutia2(catnip, sock), Cats)),
+    rel(sassy, near, fishbowl, Cats),
+    rel(tomcat, next_to, bell, Cats),
+    \+ rel(pipsqueak, next_to, fishbowl, Cats),
+    (rel(mrmittens, near, minutia2(bellball, pawprint), Cats);
+     rel(mrmittens, near, minutia2(catnip, clawmarks), Cats)),
     !.
 
 pretty_solution(Solution, X) :-
