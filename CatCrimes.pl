@@ -393,6 +393,16 @@ solution20(Cats) :-
      rel(mrmittens, near, minutia2(catnip, clawmarks), Cats)),
     !.
 
+solution21(Cats) :-
+    cat_perms(Cats),
+    rel(sassy, is_between, bell, bow, Cats),
+    rel(tomcat, near, catnip, Cats),
+    rel(ginger, right_of, tomcat, Cats),
+    \+ rel(mrmittens, near, clawmarks, Cats),
+    rel(duchess, across_from, mrmittens, Cats),
+    \+ rel(ginger, across_from, sock, Cats),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -418,4 +428,5 @@ main :-
     pretty_solution(solution17, 17),
     pretty_solution(solution18, 18),
     pretty_solution(solution19, 19),
-    pretty_solution(solution20, 20).
+    pretty_solution(solution20, 20),
+    pretty_solution(solution21, 21).
