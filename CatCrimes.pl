@@ -453,6 +453,16 @@ solution25(Cats) :-
     \+ rel(ginger, next_to, birdcage, Cats),
     !.
 
+solution26(Cats) :-
+    choose_perms(4, Cats),
+    [no_cat, _, _, no_cat, _, _] = Cats,
+    rel(whitepaws, near, clawmarks, Cats),
+    rel(duchess, right_of, stripes, Cats),
+    rel(ginger, near, pawprint, Cats),
+    \+ rel(ginger, next_to, longhair, Cats),
+    rel(bell, across_from, ginger, Cats),
+    !.
+
 solution31(Cats) :-
     cat_perms(Cats),
     \+ rel(tomcat, next_to, mrmittens, Cats),
@@ -515,5 +525,6 @@ main :-
     pretty_solution(solution23, 23),
     pretty_solution(solution24, 24),
     pretty_solution(solution25, 25),
+    pretty_solution(solution26, 26),
     pretty_solution(solution31, 31),
     pretty_solution(solution40, 40).
