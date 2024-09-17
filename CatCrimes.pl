@@ -545,6 +545,17 @@ solution34(Cats) :-
     rel(pipsqueak, across_from, sassy, Cats),
     !.
 
+solution35(Cats) :-
+    cat_perms(Cats),
+    rel(duchess, right_of, tomcat, Cats),
+    \+ rel(ginger, next_to, fishbowl, Cats),
+    rel(pipsqueak, next2_to, sassy, Cats),
+    rel(mrmittens, next3_to, duchess, Cats),
+    \+ rel(ginger, across_from, tomcat, Cats),
+    \+ rel(tomcat, across_from, mrmittens, Cats),
+    \+ rel(sassy, next3_to, tomcat, Cats),
+    !.
+
 solution40(Cats) :-
     cat_perms(Cats),
     \+ rel(ginger, next_to, bow, Cats),
@@ -606,4 +617,5 @@ main :-
     pretty_solution(solution32, 32),
     pretty_solution(solution33, 33),
     pretty_solution(solution34, 34),
+    pretty_solution(solution35, 35),
     pretty_solution(solution40, 40).
