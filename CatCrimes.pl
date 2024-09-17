@@ -86,6 +86,7 @@ trait(bell).
 trait(bow).
 trait(blueeyes).
 trait(longhair).
+trait(stripes).
 trait(whitepaws).
 
 place_to_idx(birdcage, 0).
@@ -116,6 +117,8 @@ trait_to_cat(blueeyes, ginger).
 trait_to_cat(blueeyes, tomcat).
 trait_to_cat(longhair, duchess).
 trait_to_cat(longhair, sassy).
+trait_to_cat(stripes, ginger).
+trait_to_cat(stripes, pipsqueak).
 trait_to_cat(whitepaws, sassy).
 trait_to_cat(whitepaws, mrmittens).
 
@@ -460,6 +463,27 @@ solution31(Cats) :-
     rel(mrmittens, next3_to, duchess, Cats),
     !.
 
+solution40(Cats) :-
+    cat_perms(Cats),
+    \+ rel(ginger, next_to, bow, Cats),
+    rel(blueeyes, near, bellball, Cats),
+    rel(longhair, left_of, bow, Cats),
+    \+ rel(longhair, across_from, blueeyes, Cats),
+    (trait_to_cat(bow, A),
+     rel(A, across_from, bell, Cats),
+     rel(A, right_of, stripes, Cats)),
+    (trait_to_cat(bow, B),
+     rel(B, next3_to, stripes, Cats),
+     rel(B, left_of, whitepaws, Cats)),
+    (trait_to_cat(stripes, X),
+     trait_to_cat(whitepaws, Y),
+     trait_to_cat(bell, Z),
+     X \= Y,
+     Y \= Z,
+     rel(X, next2_to, Y, Cats),
+     rel(X, next2_to, Z, Cats)),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -491,4 +515,5 @@ main :-
     pretty_solution(solution23, 23),
     pretty_solution(solution24, 24),
     pretty_solution(solution25, 25),
-    pretty_solution(solution31, 31).
+    pretty_solution(solution31, 31),
+    pretty_solution(solution40, 40).
