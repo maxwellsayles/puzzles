@@ -587,6 +587,21 @@ solution38(Cats) :-
     rel(blueeyes, near, bellball, Cats),
     !.
 
+solution39(Cats) :-
+    cat_perms(Cats),
+    (place(P),
+     rel(sassy, near, P, Cats),
+     (rel(P, across_from, tomcat, Cats);
+      rel(P, near, mouse, Cats)),
+     \+ (rel(P, across_from, tomcat, Cats),
+	 rel(P, near, mouse, Cats))),
+    rel(pipsqueak, next2_to, whitepaws, Cats),
+    \+ rel(ginger, next_to, bow, Cats),
+    rel(blueeyes, near, catnip, Cats),
+    rel(stripes, near, sock, Cats),
+    rel(ginger, across_from, pipsqueak, Cats),
+    !.
+
 solution40(Cats) :-
     cat_perms(Cats),
     \+ rel(ginger, next_to, bow, Cats),
@@ -652,4 +667,5 @@ main :-
     pretty_solution(solution36, 36),
     pretty_solution(solution37, 37),
     pretty_solution(solution38, 38),
+    pretty_solution(solution39, 39),
     pretty_solution(solution40, 40).
