@@ -450,6 +450,16 @@ solution25(Cats) :-
     \+ rel(ginger, next_to, birdcage, Cats),
     !.
 
+solution31(Cats) :-
+    cat_perms(Cats),
+    \+ rel(tomcat, next_to, mrmittens, Cats),
+    forall((cat(X), rel(X, near, mouse, Cats)),
+	   trait_to_cat(whitepaws, X)),
+    rel(ginger, across_from, bow, Cats),
+    rel(pipsqueak, across_from, whitepaws, Cats),
+    rel(mrmittens, next3_to, duchess, Cats),
+    !.
+
 pretty_solution(Solution, X) :-
     call(Solution, Cats),
     atomics_to_string(Cats, ', ', Res),
@@ -480,4 +490,5 @@ main :-
     pretty_solution(solution22, 22),
     pretty_solution(solution23, 23),
     pretty_solution(solution24, 24),
-    pretty_solution(solution25, 25).
+    pretty_solution(solution25, 25),
+    pretty_solution(solution31, 31).
