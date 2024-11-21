@@ -1,3 +1,19 @@
+/**
+ * "Brace Expansion" represents a string with multiple choices. If a substring
+ * has only one choice, it may appear as plain text. If the substring has
+ * multiple choices, it is enclosed within curly braces, and each option is
+ * separated by a comma. In this version of the problem, options can be
+ * recursively nested as well. See the tests for examples.
+ *
+ * The solution here is in Rust, largely so I could gain more exposure to Rust.
+ * The solution works by iterating over the string and maintaining a list of
+ * "word prefixes" built so far, as well as a list of substrings built so far.
+ * When an opening brace is encountered to solution recurses on a new list,
+ * ending with a closing brace. When a comma is encountered the substring is
+ * added to the list of words, and when the list is closed, the words are
+ * appended to the prefixes.
+ */
+
 fn concat_word_list(w: &str, xs: &Vec<String>) -> Vec<String> {
     xs.iter().map(|x| w.to_string() + x).collect()
 }
