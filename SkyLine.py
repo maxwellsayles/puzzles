@@ -1,6 +1,19 @@
 """
 Problem:
 https://leetcode.com/problems/the-skyline-problem/description/
+
+Each building can be represented as an extent at a given height. The output
+is the highest extent covering each extent start, and the second highest extent
+covering each extent end.
+
+The solution here is to build a set of points representing each extent
+start/end. Iterate over the points in ascending order. For each point, add all
+extents that cover that point (excluding the extent end) to a priority queue.
+Then from the queue extract the first extent that covers that point. This is the
+highest extent that covers that point. Output the coordinates if the height is
+different from the previous height.
+
+The runtime is O(nlogn) for sorting and priority queue. O(n) memory.
 """
 
 import queue
