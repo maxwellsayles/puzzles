@@ -1,0 +1,11 @@
+[package]
+name = "puzzles"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "skyline"
+path = "skyline.rs"
+
+[dependencies]
+priority-queue = "2.1.1"
