@@ -8,6 +8,10 @@ name = "jump_game"
 path = "jump_game.rs"
 
 [[bin]]
+name = "jump_game2"
+path = "jump_game2.rs"
+
+[[bin]]
 name = "skyline"
 path = "skyline.rs"
 
