@@ -3,10 +3,10 @@
 // O(n) runtime greedy. For each i that can be reached, update the furthest
 // index that can be reached.
 fn can_jump_greedy(nums: &Vec<i32>) -> bool {
-    let mut r = 0;
     let mut i = 0;
-    while i < nums.len() && i <= r {
-	r = std::cmp::max(i + nums[i] as usize, r);
+    let mut j = 0;
+    while i < nums.len() && i <= j {
+	j = std::cmp::max(i + nums[i] as usize, j);
 	i += 1;
     }
     i == nums.len()
