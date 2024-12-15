@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
+name = "candy"
+path = "candy.rs"
+
+[[bin]]
 name = "jump_game"
 path = "jump_game.rs"
 
