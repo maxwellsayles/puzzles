@@ -1,9 +1,8 @@
 // See Skyline.py for a more detailed description.
 
-use std::collections::BTreeSet;
-use priority_queue::PriorityQueue;
+use std::collections::{ BinaryHeap, BTreeSet };
 
-#[derive(Debug, Eq, Hash, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, PartialEq)]
 struct Extent {
     l: i32,
     r: i32,
@@ -18,14 +17,30 @@ impl Extent {
 
 impl Ord for Extent {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-	if self.l == other.l {
-	    if self.h == other.h {
+	if self.h == other.h {
+	    if self.l == other.l {
 		return self.r.cmp(&other.r);
 	    }
-	    return self.h.cmp(&other.h);
+	    return self.l.cmp(&other.l);
 	}
-	return self.l.cmp(&other.l);
+	return self.h.cmp(&other.h);
     }
+}
+
+impl PartialOrd for Extent {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn lhr_cmp(this: &Extent, that: &Extent) -> std::cmp::Ordering {
+    if this.l == that.l {
+	if this.h == that.h {
+	    return this.r.cmp(&that.r);
+	}
+	return this.h.cmp(&that.h);
+    }
+    return this.l.cmp(&that.l);
 }
 
 fn skyline(buildings: &Vec<(i32, i32, i32)>) -> Vec<(i32, i32)> {
@@ -36,7 +51,7 @@ fn skyline(buildings: &Vec<(i32, i32, i32)>) -> Vec<(i32, i32)> {
     let mut extents = buildings
 	.iter()
 	.map(|b| Extent::new(b.0, b.1, b.2)).collect::<Vec<Extent>>();
-    extents.sort();
+    extents.sort_by(lhr_cmp);
 
     let mut points_set = BTreeSet::new();
     for e in extents.iter() {
@@ -44,28 +59,28 @@ fn skyline(buildings: &Vec<(i32, i32, i32)>) -> Vec<(i32, i32)> {
 	points_set.insert(e.r);
     }
 
-    let mut q = PriorityQueue::new();
+    let mut q = BinaryHeap::new();
     let base_extent = Extent::new(
 	*points_set.first().unwrap(),
 	*points_set.last().unwrap(),
 	0,
     );
-    q.push(&base_extent, 0);
+    q.push(&base_extent);
 
     let mut res: Vec<(i32, i32)> = Vec::new();
     let mut i = 0;
     for p in points_set.iter() {
 	while i < extents.len() && extents[i].l <= *p {
-	    q.push(&extents[i], extents[i].h);
+	    q.push(&extents[i]);
 	    i += 1;
 	}
 	while !q.is_empty() {
-	    if let Some((e, _)) = q.pop() {
+	    if let Some(e) = q.pop() {
 		if e.r > *p {
 		    if res.is_empty() || res.last().unwrap().1 != e.h {
 			res.push((*p, e.h));
 		    }
-		    q.push(e, e.h);
+		    q.push(e);
 		    break;
 		}
 	    }

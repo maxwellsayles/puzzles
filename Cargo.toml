@@ -28,4 +28,3 @@ name = "trapping_rain_water"
 path = "trapping_rain_water.rs"
 
 [dependencies]
-priority-queue = "2.1.1"
