@@ -16,8 +16,16 @@ name = "jump_game2"
 path = "jump_game2.rs"
 
 [[bin]]
+name = "longest_substring_without_repeating_characters"
+path = "longest_substring_without_repeating_characters.rs"
+
+[[bin]]
 name = "skyline"
 path = "skyline.rs"
+
+[[bin]]
+name = "trapping_rain_water"
+path = "trapping_rain_water.rs"
 
 [dependencies]
 priority-queue = "2.1.1"
