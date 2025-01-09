@@ -31,4 +31,8 @@ path = "skyline.rs"
 name = "trapping_rain_water"
 path = "trapping_rain_water.rs"
 
+[[bin]]
+name = "water_container"
+path = "water_container.rs"
+
 [dependencies]
