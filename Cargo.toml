@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
+name = "brace_expansion"
+path = "brace_expansion.rs"
+
+[[bin]]
 name = "candy"
 path = "candy.rs"
 
